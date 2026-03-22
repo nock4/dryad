@@ -6,6 +6,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { addSubmission, getAllSubmissions } from './submissions.ts';
 import { PARCELS, PARCEL_BOUNDS } from './parcels.ts';
+import { isInjectionAttempt, sanitizeSubmissionDescription, logSecurityEvent, getSecurityLog } from './security/sanitize.ts';
+import { getTransactionHistory, isPaymentsPaused } from './security/transactionGuard.ts';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
@@ -503,6 +505,15 @@ export const dryadRoutes = [
         // SECURITY: Sanitize filename — no path traversal
         const photoFilename = `photo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
 
+        // SECURITY: Check for injection attempts in all text fields
+        const allText = `${description} ${contractorName} ${species} ${workType}`;
+        const injection = isInjectionAttempt(allText);
+        if (injection.detected) {
+          logSecurityEvent('INJECTION_ATTEMPT', `Pattern: ${injection.pattern}`, 'submit_portal');
+          res.status(400).json({ error: 'Invalid submission' } as unknown);
+          return;
+        }
+
         const submission = addSubmission({
           type: type as 'plant_id' | 'proof_of_work',
           lat,
@@ -645,6 +656,23 @@ export const dryadRoutes = [
       } catch {
         res.json({ milestones: [] });
       }
+    },
+  },
+  {
+    name: 'api-security',
+    path: '/api/security',
+    type: 'GET' as const,
+    handler: async (req: RouteRequest, res: RouteResponse) => {
+      const adminSecret = process.env.ADMIN_SECRET;
+      if (adminSecret && req.headers?.['x-admin-secret'] !== adminSecret) {
+        res.status(403).json({ error: 'Unauthorized' } as unknown);
+        return;
+      }
+      res.json({
+        securityLog: getSecurityLog().slice(-50),
+        transactionHistory: getTransactionHistory(),
+        paymentsPaused: isPaymentsPaused(),
+      });
     },
   },
 ];
