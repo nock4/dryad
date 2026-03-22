@@ -1033,8 +1033,8 @@
     <div class="grid-3" style="margin-top:16px">
         <div class="card"><h3>Year 0 (2026)</h3><p style="font-size:0.85rem">Invasive removal + soil test + dormant seeding + 300 saplings</p></div>
         <div class="card"><h3>Years 1–2</h3><p style="font-size:0.85rem">First-year weedy growth (normal). Mow 2–3&times; at 6" to favor prairie seedlings over annuals.</p></div>
-        <div class="card"><h3>Years 2–3</h3><p style="font-size:0.85rem">First prescribed burn or mow. Prairie grasses reach 1–3 ft. First forb blooms.</p></div>
-        <div class="card"><h3>Years 3–5</h3><p style="font-size:0.85rem">Annual burns. Prairie grasses dominate (4–6 ft). Pollinator activity spikes.</p></div>
+        <div class="card"><h3>Years 2–3</h3><p style="font-size:0.85rem">Selective mowing. Prairie grasses reach 1–3 ft. First forb blooms.</p></div>
+        <div class="card"><h3>Years 3–5</h3><p style="font-size:0.85rem">Prairie grasses dominate (4–6 ft). Pollinator activity spikes. Spot invasive removal.</p></div>
         <div class="card"><h3>Years 5–10</h3><p style="font-size:0.85rem">Mature prairie: 50–100+ species. Oak saplings 8–15 ft. Ecosystem self-sustaining.</p></div>
         <div class="card"><h3>Year 10+</h3><p style="font-size:0.85rem">Oak savanna structure. Deep root systems (6–15 ft) sequestering carbon long-term.</p></div>
     </div>
@@ -1208,7 +1208,7 @@ Would you be able to review the species list and planting density for this site?
                 <tr><td><a href="https://ipn4.paymentus.com/rotp/dtmi" target="_blank">Property taxes</a> (9 &times; ~$30)</td><td style="text-align:right">$270/yr</td></tr>
                 <tr><td><a href="https://venice.ai/lp/diem" target="_blank">DIEM</a> for inference</td><td style="text-align:right">$62/yr</td></tr>
                 <tr><td><strong>Lot maintenance &amp; contractor work</strong></td><td style="text-align:right"><strong>$1,000/yr</strong></td></tr>
-                <tr><td colspan="2" style="font-size:0.8rem;color:var(--text-muted);border:none;padding-top:0">Invasive removal, mowing 2–3×/yr at 6", burn prep, replanting gaps</td></tr>
+                <tr><td colspan="2" style="font-size:0.8rem;color:var(--text-muted);border:none;padding-top:0">Invasive removal, mowing 2–3×/yr at 6", replanting gaps</td></tr>
                 <tr><td><a href="https://www.hetzner.com/cloud/" target="_blank">Hetzner VPS</a> CX22</td><td style="text-align:right">$58/yr</td></tr>
                 <tr><td>LLC maintenance</td><td style="text-align:right">$50/yr</td></tr>
                 <tr><td>Base gas fees</td><td style="text-align:right">~$5/yr</td></tr>
@@ -1219,7 +1219,7 @@ Would you be able to review the species list and planting density for this site?
             <table>
                 <tr><th>Item</th><th style="text-align:right">Cost</th></tr>
                 <tr><td>Property taxes + LLC + DIEM + VPS + gas</td><td style="text-align:right">$445/yr</td></tr>
-                <tr><td><strong>Lot maintenance</strong> (1–2 burns/mows, spot removal)</td><td style="text-align:right"><strong>$500/yr</strong></td></tr>
+                <tr><td><strong>Lot maintenance</strong> (1–2 mows, spot invasive removal)</td><td style="text-align:right"><strong>$500/yr</strong></td></tr>
                 <tr class="row-total"><td><strong>Total (Year 3+)</strong></td><td style="text-align:right"><strong>$945/yr</strong></td></tr>
                 <tr class="row-alt"><td>If LVT passes</td><td style="text-align:right">$1,278/yr</td></tr>
             </table>
@@ -1597,7 +1597,7 @@ var starters=['What is Dryad?','How do I get a lot from DLBA?','What plants are 
 var kb=[
 {k:['what is dryad','about dryad','the project','what does dryad do','tell me about dryad'],r:"Dryad is an autonomous AI agent managing 9 vacant lots on 25th Street in Detroit's Chadsey-Condon neighborhood. Registered on-chain as ERC-8004 Agent #35293 on Base.\n\nIt monitors ecological health through iNaturalist, manages a stETH/USDC treasury, detects invasive species, schedules native plantings, and pays property taxes — all autonomously.\n\nIf it works on 9 lots, the same open-source framework can be adopted by any land conservancy, community land trust, or municipal land bank."},
 {k:['how does it work','technology','tech stack','architecture'],r:"Dryad runs on elizaOS (v1.7.2). The stack:\n\n• Chain: Base mainnet (Ethereum L2)\n• Treasury: 60/40 stETH/USDC split, adaptive spending modes\n• Milestones: DryadMilestones.sol (0x7572...)\n• Identity: ERC-8004 #35293, dryadforest.eth\n• Monitoring: iNaturalist API integration\n• Inference: Venice.ai (GLM 4.7 Flash)\n\nThree spending modes — NORMAL, CONSERVATION, CRITICAL — adjust based on treasury health. Designed to run 50+ years on a ~$27K stETH endowment."},
-{k:['cost','budget','money','treasury','financial','how much','funding'],r:"Bootstrap cost: ~$47,000\n• $17K setup (land, clearing, seeds, filing)\n• $2.9K establishment (years 1-2 active management)\n• $27K stETH treasury for perpetual yield\n\nYears 1-2: ~$1,445/yr (active invasive removal)\nYear 3+: ~$945/yr (established prairie, maintenance burns)\n\nThe stETH treasury generates ~3.5% APR yield. Per-lot cost by year 3: ~$105/yr — cheaper than city mowing at $67-170/yr."},
+{k:['cost','budget','money','treasury','financial','how much','funding'],r:"Bootstrap cost: ~$47,000\n• $17K setup (land, clearing, seeds, filing)\n• $2.9K establishment (years 1-2 active management)\n• $27K stETH treasury for perpetual yield\n\nYears 1-2: ~$1,445/yr (active invasive removal)\nYear 3+: ~$945/yr (established prairie, maintenance mowing)\n\nThe stETH treasury generates ~3.5% APR yield. Per-lot cost by year 3: ~$105/yr — cheaper than city mowing at $67-170/yr."},
 {k:['open source','nonprofit','conservancy','toolkit','land trust','organization'],r:"Dryad is built as an agent but designed as a toolkit. DFC's 2025 report \"Saving for the Future\" calls for the Detroit GreenSpace Conservancy.\n\nThe same framework could be deployed by:\n• The future Detroit GreenSpace Conservancy\n• Saginaw Basin Land Conservancy (1,300+ lots restored)\n• Community land trusts\n• Municipal land banks (DLBA holds 59,617 lots)\n\nOne agent manages 9 lots today. The same framework could steward thousands."},
 {k:['chadsey','condon','neighborhood','community','where is','location'],r:"Chadsey-Condon is on Detroit's southwest side (48216). Bounded by Vernor Hwy, I-75, Dix Ave, and Dearborn.\n\nA working-class community built around Detroit's industrial base. Like many neighborhoods, heavily impacted by depopulation (Detroit lost 65% since 1950).\n\nBut deep roots remain — neighbors tend gardens, watch out for each other. Dryad's V2 airdrops governance NFTs to neighbors within 500 feet — the land belongs to its community."},
 {k:['vacant','lots','how many','empty','land crisis'],r:"Detroit: 100,000+ vacant lots, 18 square miles.\n\nOwnership:\n• DLBA: 59,617 lots (down from 67K in 2016)\n• Private: 41,685 lots\n• City P&DD: 5,381 lots\n\nMowing: $13.44/lot × 5 cuts/yr = $1.35M annually\nDemolitions: $456M spent on 27K homes since 2014\nOnly 942 structures remain in DLBA inventory.\n\nThe demolition phase is over. The question: what do you do with 100K+ empty lots?"},
