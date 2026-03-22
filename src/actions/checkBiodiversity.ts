@@ -2,15 +2,45 @@ import type { Action, ActionResult, Content, HandlerCallback, IAgentRuntime, Mem
 import { logger } from '@elizaos/core';
 import { PARCEL_BOUNDS, isWithinParcels, findNearestParcel, MAX_PARCEL_DISTANCE_METERS } from '../parcels.ts';
 
-export const INVASIVE_SPECIES: Record<string, string> = {
-  'Ailanthus': 'Tree of Heaven',
+// Three-tier MNFI-sourced invasive species priority system
+export const INVASIVE_PRIORITY_1: Record<string, string> = {
+  // Aggressive woody invaders — triggers contractor hiring
+  'Rhamnus': 'Common Buckthorn',
+  'Frangula': 'Glossy Buckthorn',
+  'Elaeagnus': 'Autumn Olive',
   'Lonicera': 'Amur Honeysuckle',
+  'Rosa': 'Multiflora Rose',
+  'Celastrus': 'Oriental Bittersweet',
+};
+
+export const INVASIVE_PRIORITY_2: Record<string, string> = {
+  // Aggressive herbaceous invaders — triggers monitoring alerts
+  'Phalaris': 'Reed Canary Grass',
   'Lythrum': 'Purple Loosestrife',
-  'Phragmites': 'Common Reed',
+  'Centaurea': 'Spotted Knapweed',
   'Alliaria': 'Garlic Mustard',
   'Reynoutria': 'Japanese Knotweed',
-  'Rhamnus': 'Buckthorn',
 };
+
+export const INVASIVE_PRIORITY_3: Record<string, string> = {
+  'Ailanthus': 'Tree of Heaven',
+};
+
+// Combined flat map for backward compatibility
+export const INVASIVE_SPECIES: Record<string, string> = {
+  ...INVASIVE_PRIORITY_1,
+  ...INVASIVE_PRIORITY_2,
+  ...INVASIVE_PRIORITY_3,
+  'Phragmites': 'Common Reed (non-native)', // Note: native subsp. americanus should be left alone
+};
+
+// Native indicator species — bonus for health score
+const NATIVE_INDICATORS: string[] = [
+  'Andropogon', 'Schizachyrium', 'Sorghastrum', 'Panicum', // prairie grasses
+  'Asclepias', 'Echinacea', 'Rudbeckia', 'Monarda', 'Liatris', // key forbs
+  'Quercus', 'Carya', // oaks, hickories
+  'Solidago', 'Aster', 'Symphyotrichum', // goldenrods, asters
+];
 
 const INATURALIST_BASE = 'https://api.inaturalist.org/v1/observations';
 
@@ -82,59 +112,93 @@ export const checkBiodiversityAction: Action = {
         }
       }
 
-      // Detect invasive species (only from on-parcel observations)
-      const invasivesFound: Array<{ scientific: string; common: string; count: number; latestDate: string | null; parcels: Set<string> }> = [];
+      // Detect invasive species by priority tier (only from on-parcel observations)
+      const invasivesFound: Array<{ scientific: string; common: string; priority: number; count: number; latestDate: string | null; parcels: Set<string> }> = [];
       const nativeSpecies: Set<string> = new Set();
-      const invasiveCounts: Record<string, { count: number; latestDate: string | null; parcels: Set<string> }> = {};
+      let nativeIndicatorCount = 0;
+      const invasiveCounts: Record<string, { count: number; priority: number; latestDate: string | null; parcels: Set<string> }> = {};
+
+      // Priority-ordered invasive lookup
+      const priorityLists: Array<[Record<string, string>, number]> = [
+        [INVASIVE_PRIORITY_1, 1],
+        [INVASIVE_PRIORITY_2, 2],
+        [INVASIVE_PRIORITY_3, 3],
+        [{ 'Phragmites': 'Common Reed (non-native)' }, 2], // Non-native Phragmites
+      ];
 
       for (const obs of onParcelObs) {
         const taxonName = obs.taxon?.name || obs.species_guess || '';
+        const lowerName = taxonName.toLowerCase();
+
+        // Skip native Phragmites (subsp. americanus)
+        if (lowerName.includes('phragmites') && lowerName.includes('americanus')) {
+          nativeSpecies.add('Phragmites australis subsp. americanus (native)');
+          continue;
+        }
 
         let isInvasive = false;
-        for (const [genus, commonName] of Object.entries(INVASIVE_SPECIES)) {
-          if (taxonName.toLowerCase().includes(genus.toLowerCase())) {
-            isInvasive = true;
-            if (!invasiveCounts[genus]) {
-              invasiveCounts[genus] = { count: 0, latestDate: null, parcels: new Set() };
+        for (const [list, priority] of priorityLists) {
+          for (const [genus, commonName] of Object.entries(list)) {
+            if (lowerName.includes(genus.toLowerCase())) {
+              isInvasive = true;
+              if (!invasiveCounts[genus]) {
+                invasiveCounts[genus] = { count: 0, priority, latestDate: null, parcels: new Set() };
+              }
+              invasiveCounts[genus].count++;
+              invasiveCounts[genus].parcels.add(obs.nearestParcel);
+              if (obs.observed_on && (!invasiveCounts[genus].latestDate || obs.observed_on > invasiveCounts[genus].latestDate)) {
+                invasiveCounts[genus].latestDate = obs.observed_on;
+              }
+              break;
             }
-            invasiveCounts[genus].count++;
-            invasiveCounts[genus].parcels.add(obs.nearestParcel);
-            if (obs.observed_on && (!invasiveCounts[genus].latestDate || obs.observed_on > invasiveCounts[genus].latestDate)) {
-              invasiveCounts[genus].latestDate = obs.observed_on;
-            }
-            break;
           }
+          if (isInvasive) break;
         }
 
         if (!isInvasive && obs.taxon?.name) {
           nativeSpecies.add(obs.taxon.preferred_common_name || obs.taxon.name);
+          // Check for native indicator species (lakeplain community)
+          for (const indicator of NATIVE_INDICATORS) {
+            if (lowerName.includes(indicator.toLowerCase())) {
+              nativeIndicatorCount++;
+              break;
+            }
+          }
         }
       }
 
       for (const [genus, d] of Object.entries(invasiveCounts)) {
         invasivesFound.push({
           scientific: genus,
-          common: INVASIVE_SPECIES[genus],
+          common: INVASIVE_SPECIES[genus] || genus,
+          priority: d.priority,
           count: d.count,
           latestDate: d.latestDate,
           parcels: d.parcels,
         });
       }
+      // Sort by priority (1 = most urgent)
+      invasivesFound.sort((a, b) => a.priority - b.priority);
 
-      // Compute health score (0-100)
-      const totalInvasiveObs = invasivesFound.reduce((sum, i) => sum + i.count, 0);
-      const invasiveRatio = onParcelObs.length > 0 ? totalInvasiveObs / onParcelObs.length : 0;
+      // Compute health score (0-100) — weighted by priority tier and native indicators
+      const p1Count = invasivesFound.filter((i) => i.priority === 1).reduce((s, i) => s + i.count, 0);
+      const p2Count = invasivesFound.filter((i) => i.priority === 2).reduce((s, i) => s + i.count, 0);
+      const p3Count = invasivesFound.filter((i) => i.priority === 3).reduce((s, i) => s + i.count, 0);
+      const weightedInvasive = p1Count * 3 + p2Count * 2 + p3Count * 1; // P1 weighted 3x
+      const invasiveRatio = onParcelObs.length > 0 ? Math.min(weightedInvasive / (onParcelObs.length * 2), 1) : 0;
       const speciesDiversity = nativeSpecies.size;
-      const diversityScore = Math.min(speciesDiversity / 20, 1) * 50;
-      const invasiveScore = (1 - invasiveRatio) * 50;
-      const healthScore = Math.round(diversityScore + invasiveScore);
+      const diversityScore = Math.min(speciesDiversity / 20, 1) * 40; // 40 points for diversity
+      const invasiveScore = (1 - invasiveRatio) * 40; // 40 points for low invasive ratio
+      const indicatorBonus = Math.min(nativeIndicatorCount / 5, 1) * 20; // 20 bonus for native indicators
+      const healthScore = Math.round(diversityScore + invasiveScore + indicatorBonus);
 
+      const priorityLabels = ['', 'P1-REMOVE', 'P2-MONITOR', 'P3-ASSESS'];
       const invasiveReport =
         invasivesFound.length > 0
           ? invasivesFound
               .map(
                 (i) =>
-                  `- **${i.common}** (${i.scientific}): ${i.count} obs on ${Array.from(i.parcels).join(', ')}${i.latestDate ? ` — last seen ${i.latestDate}` : ''}`
+                  `- [${priorityLabels[i.priority]}] **${i.common}** (${i.scientific}): ${i.count} obs on ${Array.from(i.parcels).join(', ')}${i.latestDate ? ` — last seen ${i.latestDate}` : ''}`
               )
               .join('\n')
           : 'No invasive species detected within parcel boundaries.';
