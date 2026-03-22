@@ -429,28 +429,6 @@
         .page-footer a:hover { border-bottom-color: #a8e6b0; }
         .page-footer h3 { color: #fff; font-size: 1.1rem; }
 
-        /* ── Scroll reveal animations ── */
-        .reveal {
-            opacity: 0;
-            transform: translateY(32px);
-            transition: opacity 0.7s cubic-bezier(0.19, 1, 0.22, 1),
-                        transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        /* Stagger children within grids */
-        .reveal-stagger > .reveal { transition-delay: 0s; }
-        .reveal-stagger > .reveal:nth-child(2) { transition-delay: 0.08s; }
-        .reveal-stagger > .reveal:nth-child(3) { transition-delay: 0.16s; }
-        .reveal-stagger > .reveal:nth-child(4) { transition-delay: 0.24s; }
-        .reveal-stagger > .reveal:nth-child(5) { transition-delay: 0.32s; }
-        .reveal-stagger > .reveal:nth-child(6) { transition-delay: 0.40s; }
-        .reveal-stagger > .reveal:nth-child(7) { transition-delay: 0.48s; }
-        .reveal-stagger > .reveal:nth-child(8) { transition-delay: 0.56s; }
-        .reveal-stagger > .reveal:nth-child(9) { transition-delay: 0.64s; }
-
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
             .hero main { grid-template-columns: 1fr; }
@@ -1160,53 +1138,6 @@ Would you be able to review the species list and planting density for this site?
     }
     animate();
     window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
-</script>
-
-<!-- Scroll Reveal -->
-<script>
-(function() {
-    // Auto-tag elements for reveal animation
-    const selectors = [
-        'section h2',
-        'section h3',
-        'section > .content > p',
-        'section > .content > .grid-2',
-        'section > .content > .grid-3',
-        'section > .content > .grid-4',
-        '.callout',
-        '.email-card',
-        '.step',
-        'section table',
-        '#parcel-map',
-    ];
-
-    selectors.forEach(function(sel) {
-        document.querySelectorAll(sel).forEach(function(el) {
-            el.classList.add('reveal');
-        });
-    });
-
-    // Tag grid children for stagger
-    document.querySelectorAll('.grid-2, .grid-3, .grid-4').forEach(function(grid) {
-        grid.classList.add('reveal-stagger');
-        grid.querySelectorAll('.card, > div').forEach(function(child) {
-            child.classList.add('reveal');
-        });
-    });
-
-    // Observe
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-    document.querySelectorAll('.reveal').forEach(function(el) {
-        observer.observe(el);
-    });
-})();
 </script>
 
 <!-- Leaflet Parcel Map -->
