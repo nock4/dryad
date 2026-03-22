@@ -502,7 +502,7 @@
     <div id="parcel-map" style="width:100%;height:400px;border-radius:12px;margin:20px 0;border:1px solid var(--card-border);z-index:0;position:relative"></div>
     <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:24px">
         View on <a href="https://data.detroitmi.gov/pages/parcel-viewer/" target="_blank">Detroit Parcel Viewer</a> &bull;
-        <a href="https://www.google.com/maps/place/42.3290,-83.1058" target="_blank">Google Maps</a> &bull;
+        <a href="https://www.google.com/maps/place/42.33799,-83.09707" target="_blank">Google Maps</a> &bull;
         <a href="https://www.inaturalist.org/projects/dryad-25th-street-parcels-mapping" target="_blank">iNaturalist Project</a> &bull;
         <a href="https://www.treeequityscore.org/map#11.17/42.3373/-83.0959" target="_blank">Tree Equity Score Map</a>
     </p>
@@ -1062,38 +1062,41 @@ Would you be able to review the species list and planting density for this site?
     const mapEl = document.getElementById('parcel-map');
     if (!mapEl) return;
 
-    const map = L.map('parcel-map', { scrollWheelZoom: false }).setView([42.3290, -83.1058], 18);
+    const map = L.map('parcel-map', { scrollWheelZoom: false }).setView([42.33799, -83.09707], 18);
 
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri',
+        attribution: 'Tiles &copy; Esri &mdash; Source: Detroit Parcels ArcGIS API (tax parcels 12009264–12009267)',
         maxZoom: 20
     }).addTo(map);
 
-    // 9 parcels — approximate polygons (30ft × 110ft each, running E-W along 25th St)
-    const parcels = [
-        { addr: '3904', coords: [[42.32945,-83.10645],[42.32945,-83.10630],[42.32915,-83.10630],[42.32915,-83.10645]] },
-        { addr: '3908', coords: [[42.32945,-83.10630],[42.32945,-83.10615],[42.32915,-83.10615],[42.32915,-83.10630]] },
-        { addr: '3912', coords: [[42.32945,-83.10615],[42.32945,-83.10600],[42.32915,-83.10600],[42.32915,-83.10615]] },
-        { addr: '3916', coords: [[42.32945,-83.10600],[42.32945,-83.10585],[42.32915,-83.10585],[42.32915,-83.10600]] },
-        { addr: '3920', coords: [[42.32945,-83.10585],[42.32945,-83.10570],[42.32915,-83.10570],[42.32915,-83.10585]] },
-        { addr: '3924', coords: [[42.32945,-83.10570],[42.32945,-83.10555],[42.32915,-83.10555],[42.32915,-83.10570]] },
-        { addr: '3928', coords: [[42.32945,-83.10555],[42.32945,-83.10540],[42.32915,-83.10540],[42.32915,-83.10555]] },
-        { addr: '3932', coords: [[42.32945,-83.10540],[42.32945,-83.10525],[42.32915,-83.10525],[42.32915,-83.10540]] },
-        { addr: '3936', coords: [[42.32945,-83.10525],[42.32945,-83.10510],[42.32915,-83.10510],[42.32915,-83.10525]] }
+    // 9 lots interpolated from EXACT ArcGIS parcel boundaries
+    // Source: Detroit Parcels API — tax parcels 12009264–12009267
+    // Street-side (W): (-83.0970863, 42.3376955) to (-83.0973933, 42.3381688)
+    // Back-side (E): (-83.0967453, 42.3378018) to (-83.0970524, 42.3382742)
+    var parcels = [
+        { addr: '3904', coords: [[42.3376955,-83.0970863],[42.3377481,-83.0971204],[42.3378543,-83.0967794],[42.3378018,-83.0967453]] },
+        { addr: '3908', coords: [[42.3377481,-83.0971204],[42.3378007,-83.0971545],[42.3379068,-83.0968135],[42.3378543,-83.0967794]] },
+        { addr: '3912', coords: [[42.3378007,-83.0971545],[42.3378533,-83.0971886],[42.3379593,-83.0968477],[42.3379068,-83.0968135]] },
+        { addr: '3916', coords: [[42.3378533,-83.0971886],[42.3379059,-83.0972227],[42.3380118,-83.0968818],[42.3379593,-83.0968477]] },
+        { addr: '3920', coords: [[42.3379059,-83.0972227],[42.3379584,-83.0972569],[42.3380642,-83.0969159],[42.3380118,-83.0968818]] },
+        { addr: '3924', coords: [[42.3379584,-83.0972569],[42.338011,-83.097291],[42.3381167,-83.09695],[42.3380642,-83.0969159]] },
+        { addr: '3928', coords: [[42.338011,-83.097291],[42.3380636,-83.0973251],[42.3381692,-83.0969842],[42.3381167,-83.09695]] },
+        { addr: '3932', coords: [[42.3380636,-83.0973251],[42.3381162,-83.0973592],[42.3382217,-83.0970183],[42.3381692,-83.0969842]] },
+        { addr: '3936', coords: [[42.3381162,-83.0973592],[42.3381688,-83.0973933],[42.3382742,-83.0970524],[42.3382217,-83.0970183]] }
     ];
 
     parcels.forEach(function(p) {
         L.polygon(p.coords, {
-            color: '#1a5c2a',
-            fillColor: '#2d8a3e',
-            fillOpacity: 0.35,
+            color: '#8DA667',
+            fillColor: '#8DA667',
+            fillOpacity: 0.3,
             weight: 2
-        }).addTo(map).bindPopup('<b>' + p.addr + ' 25th St</b><br>30×110 ft<br>Dryad-managed');
+        }).addTo(map).bindPopup('<b>' + p.addr + ' 25th St</b><br>~21×100 ft<br>Dryad-managed');
     });
 
-    // iNaturalist observation bounding box
-    L.rectangle([[42.3285,-83.1065],[42.3295,-83.1050]], {
-        color: '#6abf5e',
+    // iNaturalist observation bounding box (wider than parcels)
+    L.rectangle([[42.3374,-83.09769],[42.33857,-83.09645]], {
+        color: '#E29E4B',
         fillOpacity: 0.05,
         weight: 1,
         dashArray: '5,5'

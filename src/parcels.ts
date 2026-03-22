@@ -10,26 +10,26 @@ export interface Parcel {
   lng: number;
 }
 
-// Bounding box covering all 9 lots (corrected coordinates from landowner)
-// NW corner: 42.3295, -83.1065
-// SE corner: 42.3285, -83.1050
+// Bounding box covering all 9 lots — from ArcGIS parcel API (tax parcels 12009264–12009267)
+// with buffer for iNaturalist observation capture
 export const PARCEL_BOUNDS = {
-  sw: { lat: 42.3285, lng: -83.1065 },
-  ne: { lat: 42.3295, lng: -83.1050 },
-  center: { lat: 42.3290, lng: -83.10575 },
+  sw: { lat: 42.3374, lng: -83.09769 },
+  ne: { lat: 42.33857, lng: -83.09645 },
+  center: { lat: 42.33799, lng: -83.09707 },
 };
 
-// Individual lot coordinates (interpolated evenly across the block, north to south)
+// Individual lot centers — interpolated from ArcGIS parcel API (tax parcels 12009264–12009267)
+// Block runs SW→NE along 25th St. Each lot center is the midpoint of its polygon.
 export const PARCELS: Parcel[] = [
-  { address: '3904 25th St', lat: 42.32855, lng: -83.10575 },
-  { address: '3908 25th St', lat: 42.32867, lng: -83.10575 },
-  { address: '3912 25th St', lat: 42.32879, lng: -83.10575 },
-  { address: '3916 25th St', lat: 42.32891, lng: -83.10575 },
-  { address: '3920 25th St', lat: 42.32900, lng: -83.10575 },
-  { address: '3924 25th St', lat: 42.32912, lng: -83.10575 },
-  { address: '3928 25th St', lat: 42.32924, lng: -83.10575 },
-  { address: '3932 25th St', lat: 42.32936, lng: -83.10575 },
-  { address: '3936 25th St', lat: 42.32945, lng: -83.10575 },
+  { address: '3904 25th St', lat: 42.33775, lng: -83.09693 },
+  { address: '3908 25th St', lat: 42.33785, lng: -83.09699 },
+  { address: '3912 25th St', lat: 42.33788, lng: -83.09701 },
+  { address: '3916 25th St', lat: 42.33793, lng: -83.09705 },
+  { address: '3920 25th St', lat: 42.33799, lng: -83.09709 },
+  { address: '3924 25th St', lat: 42.33805, lng: -83.09712 },
+  { address: '3928 25th St', lat: 42.33811, lng: -83.09715 },
+  { address: '3932 25th St', lat: 42.33817, lng: -83.09719 },
+  { address: '3936 25th St', lat: 42.33822, lng: -83.09722 },
 ];
 
 // Maximum distance in meters for a point to be "on our parcels"
