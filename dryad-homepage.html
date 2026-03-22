@@ -140,27 +140,108 @@
             position: relative;
             background: #14150F;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        #ascii-canvas {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            line-height: 10px;
-            white-space: pre;
-            color: var(--accent);
-            text-align: center;
-            user-select: none;
-            filter: drop-shadow(0 0 10px rgba(141,166,103,0.15));
+        /* ── Chat widget ── */
+        .chat-hdr {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--card-border);
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--accent-amber);
+            background: rgba(20,21,15,0.8);
+            flex-shrink: 0;
         }
+        .chat-hdr span { display: block; font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
 
-        .crosshair { position: absolute; background: rgba(141,166,103,0.08); }
-        .ch-h { width: 100%; height: 1px; top: 50%; left: 0; }
-        .ch-v { height: 100%; width: 1px; left: 50%; top: 0; }
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #chat-messages::-webkit-scrollbar { width: 5px; }
+        #chat-messages::-webkit-scrollbar-track { background: transparent; }
+        #chat-messages::-webkit-scrollbar-thumb { background: rgba(141,166,103,0.2); border-radius: 3px; }
 
-        .panel-label { position: absolute; top: 1rem; right: 1rem; font-size: 0.6rem; color: var(--accent-amber); border: 1px solid rgba(226,158,75,0.3); padding: 0.2rem 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            max-width: 88%;
+            white-space: pre-wrap;
+        }
+        .chat-msg.user {
+            background: var(--accent);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+        }
+        .chat-msg.agent {
+            background: var(--bg-alt);
+            color: var(--text-body);
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+            border: 1px solid var(--card-border);
+        }
+        .chat-msg.typing { animation: chat-pulse 1.2s infinite; }
+        @keyframes chat-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+        .chat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .chat-chip {
+            padding: 5px 10px;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            background: transparent;
+            color: var(--accent);
+            font-size: 0.72rem;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            transition: background 0.2s, color 0.2s;
+        }
+        .chat-chip:hover { background: var(--accent); color: var(--bg); }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--card-border);
+            background: rgba(20,21,15,0.8);
+            flex-shrink: 0;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 9px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            outline: none;
+        }
+        .chat-input-area input:focus { border-color: var(--accent); }
+        .chat-input-area button {
+            padding: 9px 16px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .chat-input-area button:hover { background: var(--accent-light); }
+        .chat-footer { font-size: 0.55rem; color: var(--text-muted); text-align: center; padding: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
 
         .hero-footer {
             border-top: 1px solid var(--card-border);
@@ -401,7 +482,7 @@
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
             .hero-main { grid-template-columns: 1fr; }
-            .hero-right { min-height: 40vh; }
+            .hero-right { min-height: 50vh; max-height: 500px; }
             .hero-header { grid-template-columns: 1fr; gap: 12px; }
             .hero-nav { justify-content: flex-start; gap: 1.5rem; }
             .content { padding: 0 20px; }
@@ -452,10 +533,13 @@
         </section>
 
         <section class="hero-right">
-            <div class="crosshair ch-h"></div>
-            <div class="crosshair ch-v"></div>
-            <div class="panel-label">Live // Bioscan</div>
-            <div id="ascii-canvas"></div>
+            <div class="chat-hdr">Ask Dryad<span>Learn about the forest, the neighborhood, and how to get involved</span></div>
+            <div id="chat-messages"></div>
+            <div class="chat-input-area">
+                <input id="chat-input" type="text" placeholder="Ask about the land, ecology, DLBA...">
+                <button id="chat-send">Send</button>
+            </div>
+            <div class="chat-footer">dryadforest.eth &bull; ERC-8004 #35293 &bull; Powered by elizaOS</div>
         </section>
     </main>
 
@@ -1075,42 +1159,75 @@ Would you be able to review the species list and planting density for this site?
 </div>
 </div>
 
-<!-- ═══════════════ ASCII TREE ═══════════════ -->
+<!-- ═══════════════ CHAT ENGINE ═══════════════ -->
 <script>
 (function(){
-    var canvas = document.getElementById('ascii-canvas');
-    if(!canvas) return;
-    var rows = 50, width = 64;
-    var canopyChars = ['#','\u2593','\u2592','\u2588'];
-    var fallingChars = ['.','\u00b7','\u25cb'];
-    var time = 0, mouseX = 0.5, mouseY = 0.5;
-    var falling = [];
-    for(var i=0;i<15;i++) falling.push({x:Math.random()*width,y:Math.random()*rows,speed:0.15+Math.random()*0.25,drift:(Math.random()-0.5)*0.15});
-    document.addEventListener('mousemove',function(e){mouseX=e.clientX/window.innerWidth;mouseY=e.clientY/window.innerHeight;});
-    function renderFrame(){
-        var grid=[];for(var r=0;r<rows;r++){grid[r]=[];for(var c=0;c<width;c++)grid[r][c]=' ';}
-        var cx=width/2,wind=(mouseX-0.5)*4;
-        var crownStart=5,crownEnd=30;
-        for(var y=crownStart;y<crownEnd;y++){
-            var lp=(y-crownStart)/(crownEnd-crownStart);
-            var cw;if(lp<0.25)cw=8+lp*40;else if(lp<0.7)cw=18-(lp-0.25)*10;else cw=14-(lp-0.7)*20;
-            var sway=Math.sin(time*0.04+y*0.08)*(0.8+wind*0.5);
-            for(var x=-Math.floor(cw);x<=Math.floor(cw);x++){
-                var en=Math.sin(x*0.3+y*0.2+time*0.05)*2;
-                if(Math.abs(x)<=cw+en){var tx=Math.floor(cx+x+sway);if(tx>=0&&tx<width){var d=Math.abs(x)/cw;grid[y][tx]=canopyChars[Math.min(Math.floor(d*canopyChars.length),canopyChars.length-1)];}}
-            }
-        }
-        for(var y2=crownEnd-2;y2<rows;y2++){
-            var tt=1.8-(y2-crownEnd+2)*0.02;var sw=Math.sin(time*0.04+y2*0.06)*(0.3+wind*0.3);var tw=Math.max(0.8,tt);
-            for(var x2=-tw;x2<=tw;x2++){var tx2=Math.floor(cx+x2+sw);if(tx2>=0&&tx2<width)grid[y2][tx2]=(Math.abs(x2)<0.5&&y2%3===0)?'+':'|';}
-        }
-        var ry=rows-5;
-        for(var side=-1;side<=1;side+=2)for(var i2=0;i2<6;i2++){var rx=Math.floor(cx+(side*(2+i2)));var ry2=Math.floor(ry+i2*0.6);if(rx>=0&&rx<width&&ry2<rows)grid[ry2][rx]=side<0?'\\':'/';}
-        falling.forEach(function(p){p.y+=p.speed*(1+mouseY*0.5);p.x+=p.drift+(wind*0.15);if(p.y>=rows){p.y=0;p.x=Math.random()*width;}var py=Math.floor(p.y),px=Math.floor(p.x);if(py>=0&&py<rows&&px>=0&&px<width&&grid[py][px]===' ')grid[py][px]=fallingChars[Math.floor((p.y+time)%fallingChars.length)];});
-        canvas.textContent=grid.map(function(row){return row.join('');}).join('\n');
-        time++;requestAnimationFrame(renderFrame);
-    }
-    renderFrame();
+var ELIZA='http://5.75.225.23:3000', useFallback=false;
+var starters=['What is Dryad?','How do I get a lot from DLBA?','What plants are native here?','Tell me about Chadsey-Condon'];
+
+var kb=[
+{k:['what is dryad','about dryad','the project','what does dryad do','tell me about dryad'],r:"Dryad is an autonomous AI agent managing 9 vacant lots on 25th Street in Detroit's Chadsey-Condon neighborhood. Registered on-chain as ERC-8004 Agent #35293 on Base.\n\nIt monitors ecological health through iNaturalist, manages a stETH/USDC treasury, detects invasive species, schedules native plantings, and pays property taxes — all autonomously.\n\nIf it works on 9 lots, the same open-source framework can be adopted by any land conservancy, community land trust, or municipal land bank."},
+{k:['how does it work','technology','tech stack','architecture'],r:"Dryad runs on elizaOS (v1.7.2). The stack:\n\n• Chain: Base mainnet (Ethereum L2)\n• Treasury: 60/40 stETH/USDC split, adaptive spending modes\n• Milestones: DryadMilestones.sol (0x7572...)\n• Identity: ERC-8004 #35293, dryadforest.eth\n• Monitoring: iNaturalist API integration\n• Inference: Venice.ai (GLM 4.7 Flash)\n\nThree spending modes — NORMAL, CONSERVATION, CRITICAL — adjust based on treasury health. Designed to run 50+ years on a ~$27K stETH endowment."},
+{k:['cost','budget','money','treasury','financial','how much','funding'],r:"Bootstrap cost: ~$47,000\n• $17K setup (land, clearing, seeds, filing)\n• $2.9K establishment (years 1-2 active management)\n• $27K stETH treasury for perpetual yield\n\nYears 1-2: ~$1,445/yr (active invasive removal)\nYear 3+: ~$945/yr (established prairie, maintenance burns)\n\nThe stETH treasury generates ~3.5% APR yield. Per-lot cost by year 3: ~$105/yr — cheaper than city mowing at $67-170/yr."},
+{k:['open source','nonprofit','conservancy','toolkit','land trust','organization'],r:"Dryad is built as an agent but designed as a toolkit. DFC's 2025 report \"Saving for the Future\" calls for the Detroit GreenSpace Conservancy.\n\nThe same framework could be deployed by:\n• The future Detroit GreenSpace Conservancy\n• Saginaw Basin Land Conservancy (1,300+ lots restored)\n• Community land trusts\n• Municipal land banks (DLBA holds 59,617 lots)\n\nOne agent manages 9 lots today. The same framework could steward thousands."},
+{k:['chadsey','condon','neighborhood','community','where is','location'],r:"Chadsey-Condon is on Detroit's southwest side (48216). Bounded by Vernor Hwy, I-75, Dix Ave, and Dearborn.\n\nA working-class community built around Detroit's industrial base. Like many neighborhoods, heavily impacted by depopulation (Detroit lost 65% since 1950).\n\nBut deep roots remain — neighbors tend gardens, watch out for each other. Dryad's V2 airdrops governance NFTs to neighbors within 500 feet — the land belongs to its community."},
+{k:['vacant','lots','how many','empty','land crisis'],r:"Detroit: 100,000+ vacant lots, 18 square miles.\n\nOwnership:\n• DLBA: 59,617 lots (down from 67K in 2016)\n• Private: 41,685 lots\n• City P&DD: 5,381 lots\n\nMowing: $13.44/lot × 5 cuts/yr = $1.35M annually\nDemolitions: $456M spent on 27K homes since 2014\nOnly 942 structures remain in DLBA inventory.\n\nThe demolition phase is over. The question: what do you do with 100K+ empty lots?"},
+{k:['land bank','dlba','buy a lot','acquire','get a lot','side lot','purchase','how to get'],r:"DLBA programs (buildingdetroit.org):\n\nSIDE LOT: $100-200, must own adjacent home\nOWN IT NOW: Open to anyone, set prices\nAUCTION: Periodic, low starting bids\nCOMMUNITY PARTNER: Discounted for nonprofits\n\nCREATE-A-PROJECT: $250/lot for LLC or 501(c)3\n• Contact: LBP@detroitmi.gov\n• Office hours: 1st Thursday/month, 12-1pm\n• Must be current on city payments\n• Neighbor notification required 30 days before work\n\nAll buyers must maintain the property. Dryad automates this."},
+{k:['property tax','taxes','tax exempt'],r:"Detroit property tax: ~$30/lot/year for vacant land.\n\nDryad's approach: autonomous tax payment from stETH yield.\n\nDetroit accepts crypto for taxes via PayPal at checkout (ipn4.paymentus.com).\n\nUnder the proposed Land Value Tax, vacant land millage would increase ($30→$67/lot). But urban farms, community gardens, and designated community spaces are EXEMPT.\n\nLong-term: Michigan Qualified Conservation Organizations are fully tax-exempt on conservation land."},
+{k:['native','plants','species','flora','seed','vegetation','what grows'],r:"Detroit sits on glacial lakeplain. Native communities:\n\nLAKEPLAIN OAK OPENINGS (G2/S1 — globally imperiled):\nBur oak, swamp white oak, big bluestem, Indian grass, wild bergamot\n\nLAKEPLAIN WET PRAIRIE (G2/S1 — <1% survives):\nCord grass, swamp milkweed, mountain mint, blazing star\n\nDryad's plan: 300 saplings (Cold Stream Farm) + Prairie Moon seed mix\n• 80 Bur Oak, 60 Swamp White Oak, 40 White Oak, 30 Pin Oak\n• 25+ species seed mix: grasses 60%, forbs 40%\n• Full-season bloom: April–October"},
+{k:['invasive','weed','phragmites','buckthorn','ailanthus','removal'],r:"3-tier MNFI priority system:\n\nTIER 1 — REMOVE (contractors):\nCommon/glossy buckthorn, autumn olive, Amur honeysuckle, multiflora rose, Oriental bittersweet\n\nTIER 2 — MANAGE:\nNon-native Phragmites, reed canary grass, purple loosestrife, spotted knapweed, garlic mustard, Japanese knotweed\n\nTIER 3 — ASSESS:\nTree of Heaven (300K seeds/yr, ailanthone toxin)\n\nIMPORTANT: Native Phragmites (subsp. americanus) has reddish stems — leave it alone!"},
+{k:['bird','animal','wildlife','kirtland','snake','monarch'],r:"Species of note:\n\n• Kirtland's Snake (state threatened) — known from Detroit vacant lots\n• Monarch butterfly (federal candidate) — our milkweed supports them\n• Rusty-patched bumble bee (federally endangered, historically present)\n• Eastern Meadowlark, Bobolink (grassland-dependent, declining)\n\nDetroit River flyway brings warblers during migration.\n\nTrack observations: inaturalist.org/projects/dryad-25th-street-parcels-mapping"},
+{k:['tree','canopy','forest','oak'],r:"Detroit tree canopy: 26-31% (recommended: 40%+)\n\n• 286/875 block groups below Tree Equity Score 75\n• 19% of canopy over unprotected vacant land\n• Detroit Tree Equity Partnership: $30M, 75K trees\n\nDryad's 300 saplings:\n• Bur oak (lives 300+ years, fire-resistant)\n• Swamp white oak (tolerates wet clay)\n• Understory: serviceberry, hawthorn, elderberry\n\nTrees lower temps by up to 21°F and increase property values 5% within 500 ft."},
+{k:['blockchain','base','contract','nft','erc','onchain'],r:"Dryad on Base mainnet:\n\n• DryadMilestones.sol: 0x7572dcac...bc22\n• ERC-8004 Agent #35293: 0x8004A169...a432\n• Wallet: 0xf2f7527D...0880\n• ENS: dryadforest.eth\n\nV2: PropertyDeedNFT (tokenized lots), Snapshot DAO governance, soulbound stewardship NFTs for neighbors."},
+{k:['governance','vote','airdrop','dao','neighbor','community ownership'],r:"V2 governance:\n\nPROXIMITY AIRDROP: Free soulbound NFTs to residents within 500 ft\nPARTICIPATION: Earn NFTs via iNaturalist observations, volunteer work\n1 NFT = 1 vote. Non-transferable (no speculation).\n\nSnapshot DAO (dryadforest.eth):\n• Vote on planting plans, contractor selection, acquisitions\n• Agent executes community decisions\n• 75% supermajority for land use changes\n\nThe forest belongs to its neighbors, not investors."},
+{k:['inaturalist','inat','observation','biodiversity'],r:"iNaturalist project: inaturalist.org/projects/dryad-25th-street-parcels-mapping\n\nHow to contribute:\n1. Download iNaturalist app (free)\n2. Visit the lots at 25th St between Ash & Beech\n3. Photograph any living thing\n4. Upload — AI + community ID the species\n\nEvery observation feeds Dryad's health score and guides restoration decisions."},
+{k:['hello','hi','hey','good morning','good afternoon'],r:"Hello! I'm Dryad — an autonomous agent managing 9 lots in Detroit's Chadsey-Condon neighborhood.\n\nI can tell you about:\n• The project and how it works\n• Detroit's vacant land crisis & DLBA\n• Native ecology & invasive species\n• The blockchain & governance model\n• How to get involved\n\nWhat would you like to know?"}
+];
+
+function match(input){
+  var l=input.toLowerCase(),best=null,bestS=0;
+  for(var i=0;i<kb.length;i++){var s=0;for(var j=0;j<kb[i].k.length;j++){if(l.indexOf(kb[i].k[j])>=0)s+=kb[i].k[j].split(' ').length;}if(s>bestS){bestS=s;best=kb[i];}}
+  return best&&bestS>0?best.r:"I can help with:\n• The Dryad project\n• Detroit vacant land & DLBA process\n• Native plants & ecology\n• Invasive species\n• Blockchain & governance\n• How to get involved\n\nTry asking about one of these!";
+}
+
+function addMsg(role,text,isTyping){
+  var el=document.getElementById('chat-messages');
+  var d=document.createElement('div');
+  d.className='chat-msg '+role+(isTyping?' typing':'');
+  d.textContent=text;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+  return d;
+}
+
+async function send(text){
+  addMsg('user',text);
+  var typing=addMsg('agent','...',true);
+  var resp;
+  if(!useFallback){
+    try{
+      var r=await fetch(ELIZA+'/api/agents',{signal:AbortSignal.timeout(3000)});
+      if(!r.ok)throw 0;
+      // Try sending to agent — adjust endpoint as needed
+      var r2=await fetch(ELIZA+'/Dryad/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,userId:'web-'+Math.random().toString(36).substr(2,6),roomId:'homepage'}),signal:AbortSignal.timeout(12000)});
+      if(!r2.ok)throw 0;
+      var data=await r2.json();
+      resp=Array.isArray(data)?data.map(function(m){return m.text}).join('\n\n'):(data.text||data.message||match(text));
+    }catch(e){useFallback=true;resp=match(text);}
+  }else{resp=match(text);}
+  typing.remove();
+  addMsg('agent',resp);
+}
+
+function init(){
+  addMsg('agent',"Welcome! I'm Dryad — an autonomous agent stewarding 9 vacant lots on 25th Street in Detroit's Chadsey-Condon neighborhood.\n\nAsk me about the project, the ecology, how to acquire lots through the Detroit Land Bank, or what native species thrive here.");
+  var chips=document.createElement('div');chips.className='chat-chips';
+  starters.forEach(function(s){var b=document.createElement('button');b.className='chat-chip';b.textContent=s;b.onclick=function(){send(s);chips.remove();};chips.appendChild(b);});
+  document.getElementById('chat-messages').appendChild(chips);
+  document.getElementById('chat-send').onclick=function(){var v=document.getElementById('chat-input').value.trim();if(v){send(v);document.getElementById('chat-input').value='';}};
+  document.getElementById('chat-input').onkeydown=function(e){if(e.key==='Enter'){var v=this.value.trim();if(v){send(v);this.value='';}}};
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 
