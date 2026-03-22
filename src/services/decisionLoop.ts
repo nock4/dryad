@@ -16,6 +16,7 @@ import { sendDryadEmail } from '../actions/agentMail.ts';
 import { PARCEL_BOUNDS } from '../parcels.ts';
 import { getWeatherAssessment } from '../actions/checkWeather.ts';
 import { getCurrentSeason, getSeasonalBriefing } from '../utils/seasonalAwareness.ts';
+import { recordLoopExecution, recordApiCall } from '../actions/selfAssess.ts';
 
 const CYCLE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
@@ -92,8 +93,10 @@ export class DecisionLoopService extends Service {
 
       const elapsed = ((Date.now() - cycleStart) / 1000).toFixed(1);
       logger.info(`[Dryad] ═══ Decision loop cycle complete (${elapsed}s) ═══`);
+      recordLoopExecution(true);
     } catch (error) {
       logger.error({ error }, '[Dryad] Decision loop cycle failed');
+      recordLoopExecution(false);
     }
   }
 

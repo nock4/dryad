@@ -35,6 +35,9 @@ const knowledgeProvider: Provider = {
       if (filename === 'contractors' && /contractor|hire|worker|removal|planting|mow|onboard|discovery/.test(messageText)) {
         relevantKnowledge.push(content);
       }
+      if (filename === 'learned' && /learn|discover|new|recent|observe|found|spotted|species/.test(messageText)) {
+        relevantKnowledge.push(content);
+      }
     }
 
     if (relevantKnowledge.length === 0) return { text: '', values: {}, data: {} };

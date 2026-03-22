@@ -1,6 +1,9 @@
 import type { Action, ActionResult, Content, HandlerCallback, IAgentRuntime, Memory, State } from '@elizaos/core';
 import { logger } from '@elizaos/core';
 import { PARCEL_BOUNDS, isWithinParcels, findNearestParcel, MAX_PARCEL_DISTANCE_METERS } from '../parcels.ts';
+import * as fs from 'fs';
+import * as path from 'path';
+import { recordApiCall } from './selfAssess.ts';
 
 // Three-tier MNFI-sourced invasive species priority system
 export const INVASIVE_PRIORITY_1: Record<string, string> = {
@@ -191,6 +194,30 @@ export const checkBiodiversityAction: Action = {
       const invasiveScore = (1 - invasiveRatio) * 40; // 40 points for low invasive ratio
       const indicatorBonus = Math.min(nativeIndicatorCount / 5, 1) * 20; // 20 bonus for native indicators
       const healthScore = Math.round(diversityScore + invasiveScore + indicatorBonus);
+
+      // ── Observation Learning: record new species to learned.md ──
+      try {
+        const learnedPath = path.join(__dirname, '../knowledge/learned.md');
+        let learnedContent = fs.readFileSync(learnedPath, 'utf-8');
+        const allKnownGenera = [...Object.keys(INVASIVE_SPECIES), ...NATIVE_INDICATORS];
+
+        for (const obs of onParcelObs) {
+          const species = obs.taxon?.name;
+          if (!species) continue;
+          const isKnown = allKnownGenera.some(g => species.toLowerCase().includes(g.toLowerCase()));
+          if (!isKnown && !learnedContent.includes(species)) {
+            const commonName = obs.taxon?.preferred_common_name || 'no common name';
+            const entry = `\n- [${new Date().toISOString().split('T')[0]}] New species: **${species}** (${commonName}) at ${obs.nearestParcel}. Observer: ${obs.quality_grade}. Needs classification.`;
+            learnedContent = learnedContent.replace('## New Species Observations\n', '## New Species Observations\n' + entry);
+            fs.writeFileSync(learnedPath, learnedContent, 'utf-8');
+            logger.info(`[Dryad] Learned new species: ${species} (${commonName})`);
+          }
+        }
+      } catch (e) {
+        // Non-critical — don't fail the action if learning fails
+      }
+
+      recordApiCall('iNaturalist', true);
 
       const priorityLabels = ['', 'P1-REMOVE', 'P2-MONITOR', 'P3-ASSESS'];
       const invasiveReport =
