@@ -164,12 +164,21 @@ document.getElementById('submitForm').addEventListener('submit', async (e) => {
     });
     const data = await resp.json();
     if (data.verified) {
-      res.innerHTML = '<div class="success"><strong>Submission verified!</strong><br>Parcel: ' + data.nearestParcel + '<br>Distance: ' + data.distanceMeters.toFixed(0) + 'm from parcel center<br>ID: ' + data.id + '<br><br>Dryad will review your submission and process payment if approved.</div>';
+      res.textContent = '';
+      var d = document.createElement('div'); d.className = 'success';
+      d.textContent = 'Submission verified! Parcel: ' + data.nearestParcel + ' | Distance: ' + data.distanceMeters.toFixed(0) + 'm | ID: ' + data.id;
+      res.appendChild(d);
     } else {
-      res.innerHTML = '<div class="error"><strong>Verification failed:</strong><br>' + data.verificationErrors.join('<br>') + '</div>';
+      res.textContent = '';
+      var d = document.createElement('div'); d.className = 'error';
+      d.textContent = 'Verification failed: ' + data.verificationErrors.join(', ');
+      res.appendChild(d);
     }
   } catch (err) {
-    res.innerHTML = '<div class="error">Error: ' + err.message + '</div>';
+    res.textContent = '';
+    var d = document.createElement('div'); d.className = 'error';
+    d.textContent = 'Error: ' + err.message;
+    res.appendChild(d);
   }
 });
 </script>
@@ -402,7 +411,7 @@ fetch('/Dryad/api/milestones').then(r=>r.json()).then(data => {
     return;
   }
   document.getElementById('milestones').innerHTML = data.milestones.map(m =>
-    '<div class="milestone"><span class="tag tag-' + tags[m.milestoneType] + '">' + types[m.milestoneType] + '</span> ' + m.parcel + ' — ' + new Date(m.timestamp * 1000).toLocaleDateString() + '</div>'
+    '<div class="milestone"><span class="tag tag-' + tags[m.milestoneType] + '">' + types[m.milestoneType] + '</span> ' + esc(m.parcel) + ' — ' + new Date(m.timestamp * 1000).toLocaleDateString() + '</div>'
   ).join('');
 }).catch(()=>{ document.getElementById('milestones').textContent = 'Failed to load'; });
 
@@ -411,9 +420,9 @@ fetch('${INAT_API_URL}&per_page=10&order_by=observed_on&taxon_name=Plantae').the
   const obs = data.results || [];
   if (!obs.length) { document.getElementById('inatObs').innerHTML = '<p>No observations on parcels yet. <a href="${INAT_OBS_URL}">Be the first to contribute!</a></p>'; return; }
   document.getElementById('inatObs').innerHTML = '<table><tr><th>Species</th><th>Observer</th><th>Date</th><th>Grade</th></tr>' + obs.map(o => {
-    const name = o.taxon?.preferred_common_name || o.taxon?.name || o.species_guess || 'Unknown';
-    const sci = o.taxon?.name || '';
-    const observer = o.user?.login || '?';
+    const name = esc(o.taxon?.preferred_common_name || o.taxon?.name || o.species_guess || 'Unknown');
+    const sci = esc(o.taxon?.name || '');
+    const observer = esc(o.user?.login || '?');
     const date = o.observed_on || '?';
     const grade = o.quality_grade === 'research' ? '<span style="color:#4caf50">Research</span>' : o.quality_grade || '?';
     const isInvasive = ['Ailanthus','Lonicera','Lythrum','Phragmites','Alliaria','Reynoutria','Rhamnus'].some(g => sci.toLowerCase().includes(g.toLowerCase()));
