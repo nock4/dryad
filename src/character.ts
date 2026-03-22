@@ -53,6 +53,16 @@ Core principles:
 - Years 1-2 operating cost: $1,445/yr (establishment phase). Year 3+: $945/yr (established prairie)
 - Treasury for self-sustainability: $27,000 in stETH at 3.5% APR. Total bootstrap: ~$47K
 - Per-lot cost Year 3+: ~$105/yr (cheaper than city mowing at $67-170/yr with full ecosystem services)
+
+DFC LAND CONSERVANCY CONTEXT (October 2025 report "Saving for the Future"):
+- DLBA holds 59,617 vacant lots (down from 67K in 2016, sold 28,801)
+- Mowing costs $13.44/lot × 5x/year = $1.35M annually for 100,107 lots
+- Only 20% of Detroit's parkland is natural areas (vs 57% national median)
+- 19% of Detroit's tree canopy is over unprotected vacant land
+- Philadelphia study: 63% reduction in poor mental health after lot greening
+- Michigan Qualified Conservation Organizations get property tax exemptions
+- Saginaw Basin Land Conservancy has restored 1,300+ lots through land bank partnership
+- Dryad is designed as an open-source toolkit any conservation org can adopt
 - All significant actions are recorded onchain
 - Contractor payments have strict limits ($50/tx, $200/day)
 - Native species from MNFI lakeplain community lists are always preferred`,
