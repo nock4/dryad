@@ -12,6 +12,21 @@ const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 // Ensure uploads dir exists
 try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch {}
 
+// SECURITY: Simple rate limiter for submission endpoint
+const submitRateLimit = { count: 0, windowStart: Date.now() };
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 10; // 10 submissions per minute
+
+function checkSubmitRateLimit(): boolean {
+  const now = Date.now();
+  if (now - submitRateLimit.windowStart > RATE_LIMIT_WINDOW_MS) {
+    submitRateLimit.count = 0;
+    submitRateLimit.windowStart = now;
+  }
+  submitRateLimit.count++;
+  return submitRateLimit.count <= RATE_LIMIT_MAX;
+}
+
 // iNaturalist URLs
 const INAT_PROJECT_URL = 'https://www.inaturalist.org/projects/dryad-25th-street-parcels-mapping';
 const INAT_OBS_URL = `https://www.inaturalist.org/observations?nelat=${PARCEL_BOUNDS.ne.lat}&nelng=${PARCEL_BOUNDS.ne.lng}&swlat=${PARCEL_BOUNDS.sw.lat}&swlng=${PARCEL_BOUNDS.sw.lng}`;
@@ -406,14 +421,17 @@ fetch('${INAT_API_URL}&per_page=10&order_by=observed_on&taxon_name=Plantae').the
   }).join('') + '</table>';
 }).catch(()=>{ document.getElementById('inatObs').textContent = 'Failed to load'; });
 
+// SECURITY: HTML escape to prevent XSS from user-supplied data
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
 // Load submissions
 fetch('/Dryad/api/submissions').then(r=>r.json()).then(data => {
-  if (!data.length) { document.getElementById('submissions').innerHTML = '<p>No submissions yet. <a href="/submit">Submit a photo</a></p>'; return; }
+  if (!data.length) { document.getElementById('submissions').innerHTML = '<p>No submissions yet. <a href="/Dryad/submit">Submit a photo</a></p>'; return; }
   document.getElementById('submissions').innerHTML = data.slice(0,10).map(s =>
     '<div class="sub-item">' +
     '<span class="' + (s.verified ? 'sub-verified' : 'sub-failed') + '">' + (s.verified ? '✅' : '❌') + '</span> ' +
-    '<strong>' + s.type + '</strong> at ' + s.nearestParcel +
-    (s.species ? ' — ' + s.species : '') +
+    '<strong>' + esc(s.workType || s.type) + '</strong> at ' + esc(s.nearestParcel) +
+    (s.contractorName ? ' — ' + esc(s.contractorName) : '') +
     ' <span style="color:#666;font-size:12px">' + new Date(s.submittedAt).toLocaleString() + '</span>' +
     '</div>'
   ).join('');
@@ -446,18 +464,35 @@ export const dryadRoutes = [
     path: '/api/submissions',
     type: 'POST' as const,
     handler: async (req: RouteRequest, res: RouteResponse) => {
+      // SECURITY: Rate limiting
+      if (!checkSubmitRateLimit()) {
+        res.status(429).json({ error: 'Too many submissions. Try again in a minute.' } as unknown);
+        return;
+      }
+
       try {
         const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body as any) || {};
+
+        // SECURITY: Input sanitization — strip HTML tags, enforce length limits
+        const sanitize = (s: string, maxLen: number) => String(s || '').replace(/<[^>]*>/g, '').slice(0, maxLen);
         const lat = parseFloat(body?.lat || '0');
         const lng = parseFloat(body?.lng || '0');
+
+        // SECURITY: Reject obviously invalid coordinates
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          res.status(400).json({ error: 'Invalid GPS coordinates' } as unknown);
+          return;
+        }
+
         const timestamp = body?.timestamp ? new Date(body.timestamp).getTime() : Date.now();
-        const type = body?.type || 'proof_of_work';
-        const species = body?.species || '';
-        const workType = body?.workType || '';
-        const description = body?.description || '';
-        const contractorName = body?.contractorName || '';
-        const contractorEmail = body?.contractorEmail || '';
-        const photoFilename = body?.photoFilename || `photo_${Date.now()}.jpg`;
+        const type = body?.type === 'plant_id' ? 'plant_id' : 'proof_of_work'; // Whitelist types
+        const species = sanitize(body?.species, 200);
+        const workType = sanitize(body?.workType, 100);
+        const description = sanitize(body?.description, 2000);
+        const contractorName = sanitize(body?.contractorName, 100);
+        const contractorEmail = sanitize(body?.contractorEmail, 200);
+        // SECURITY: Sanitize filename — no path traversal
+        const photoFilename = `photo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
 
         const submission = addSubmission({
           type: type as 'plant_id' | 'proof_of_work',
@@ -483,7 +518,9 @@ export const dryadRoutes = [
     path: '/api/submissions',
     type: 'GET' as const,
     handler: async (_req: RouteRequest, res: RouteResponse) => {
-      res.json(getAllSubmissions());
+      // SECURITY: Strip contractor email from public response (PII)
+      const subs = getAllSubmissions().map(({ contractorEmail, ...rest }) => rest);
+      res.json(subs);
     },
   },
   {

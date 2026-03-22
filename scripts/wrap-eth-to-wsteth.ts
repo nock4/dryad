@@ -65,7 +65,7 @@ async function main() {
       fee: 100, // 0.01% fee tier
       recipient: account.address,
       amountIn: swapAmount,
-      amountOutMinimum: 0n, // Accept any amount (small swap, low slippage)
+      amountOutMinimum: 0n, // TODO: MEDIUM — use price oracle for slippage protection. Acceptable for one-time small swap.
       sqrtPriceLimitX96: 0n,
     }],
     value: swapAmount,

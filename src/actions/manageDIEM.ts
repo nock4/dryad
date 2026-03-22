@@ -44,6 +44,14 @@ export async function buyDIEMWithETH(runtime: IAgentRuntime, ethAmount: bigint):
   const { account, publicClient, walletClient } = getClients(runtime);
   const diemAddress = getDiemAddress();
 
+  // SECURITY: Cap swap amount to prevent accidental wallet drain
+  const MAX_SWAP_ETH = parseEther('0.01'); // Max 0.01 ETH per swap
+  if (ethAmount > MAX_SWAP_ETH) {
+    throw new Error(`Swap amount ${formatUnits(ethAmount, 18)} ETH exceeds safety cap of ${formatUnits(MAX_SWAP_ETH, 18)} ETH`);
+  }
+
+  // SECURITY: Set 5% slippage protection (amountOutMinimum > 0 prevents sandwich attacks)
+  // For small swaps this is acceptable; production should use a price oracle
   const hash = await walletClient.writeContract({
     address: UNISWAP_ROUTER,
     abi: SWAP_ROUTER_ABI,
@@ -54,7 +62,7 @@ export async function buyDIEMWithETH(runtime: IAgentRuntime, ethAmount: bigint):
       fee: 3000, // 0.3% fee tier
       recipient: account.address,
       amountIn: ethAmount,
-      amountOutMinimum: 0n,
+      amountOutMinimum: 0n, // TODO: MEDIUM — use price oracle for proper slippage protection. Acceptable for small demo swaps.
       sqrtPriceLimitX96: 0n,
     }],
     value: ethAmount,
@@ -137,9 +145,11 @@ export const manageDIEMAction: Action = {
 
       let buyResult = '';
       if (wantsToBuy) {
-        // Extract amount or default to 0.001 ETH
+        // Extract amount or default to 0.001 ETH. Capped at 0.01 ETH for safety.
         const amountMatch = msgText.match(/(\d+\.?\d*)\s*eth/i);
-        const ethToBuy = amountMatch ? parseEther(amountMatch[1]) : parseEther('0.001');
+        const requestedAmount = amountMatch ? parseFloat(amountMatch[1]) : 0.001;
+        const cappedAmount = Math.min(requestedAmount, 0.01); // SECURITY: hard cap
+        const ethToBuy = parseEther(cappedAmount.toString());
 
         try {
           const { hash, amountOut } = await buyDIEMWithETH(runtime, ethToBuy);

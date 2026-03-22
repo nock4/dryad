@@ -4,6 +4,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import { isWithinParcels, findNearestParcel, MAX_PARCEL_DISTANCE_METERS } from './parcels.ts';
 
 export interface PhotoSubmission {
@@ -92,7 +93,7 @@ export function addSubmission(sub: Omit<PhotoSubmission, 'id' | 'submittedAt' | 
   const validation = validateSubmission(sub.lat, sub.lng, sub.timestamp);
   const submission: PhotoSubmission = {
     ...sub,
-    id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    id: `sub_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`,
     submittedAt: Date.now(),
     nearestParcel: validation.nearestParcel,
     distanceMeters: validation.distance,
