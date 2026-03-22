@@ -8,6 +8,7 @@ import { recordMilestoneAction } from './actions/recordMilestone.ts';
 import { payContractorAction } from './actions/payContractor.ts';
 import { verifyAttestationAction } from './actions/verifyAttestation.ts';
 import { sendEmailAction, checkEmailAction } from './actions/agentMail.ts';
+import { checkWeatherAction } from './actions/checkWeather.ts';
 import { dryadRoutes } from './routes.ts';
 import { DecisionLoopService } from './services/decisionLoop.ts';
 import knowledgeProvider from './providers/knowledgeProvider.ts';
@@ -33,6 +34,7 @@ const dryadPlugin: Plugin = {
     verifyAttestationAction,
     sendEmailAction,
     checkEmailAction,
+    checkWeatherAction,
   ],
 
   providers: [knowledgeProvider],

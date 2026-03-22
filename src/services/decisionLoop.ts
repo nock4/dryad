@@ -14,6 +14,8 @@ import { getSubmissions, markProcessed, type PhotoSubmission } from '../submissi
 import { INVASIVE_SPECIES } from '../actions/checkBiodiversity.ts';
 import { sendDryadEmail } from '../actions/agentMail.ts';
 import { PARCEL_BOUNDS } from '../parcels.ts';
+import { getWeatherAssessment } from '../actions/checkWeather.ts';
+import { getCurrentSeason, getSeasonalBriefing } from '../utils/seasonalAwareness.ts';
 
 const CYCLE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
@@ -67,8 +69,17 @@ export class DecisionLoopService extends Service {
     const cycleStart = Date.now();
 
     try {
-      // 1. Process photo submissions
-      await this.processSubmissions();
+      // 0. Environmental context
+      const season = getCurrentSeason();
+      const weather = await getWeatherAssessment();
+      logger.info(`[Dryad] ${getSeasonalBriefing()}`);
+      logger.info(`[Dryad] Weather: ${weather.summary}`);
+      if (weather.flags.length > 0) {
+        logger.info(`[Dryad] Weather flags: ${weather.flags.join(', ')}`);
+      }
+
+      // 1. Process photo submissions (weather-gated for contractor follow-up)
+      await this.processSubmissions(weather.contractorWorkSafe, season);
 
       // 2. Check iNaturalist
       await this.checkBiodiversity();
@@ -86,7 +97,7 @@ export class DecisionLoopService extends Service {
     }
   }
 
-  private async processSubmissions() {
+  private async processSubmissions(contractorWorkSafe: boolean = true, season?: ReturnType<typeof getCurrentSeason>) {
     const unprocessed = getSubmissions({ unprocessedOnly: true });
     if (unprocessed.length === 0) {
       logger.info('[Dryad] No new verified submissions');
@@ -113,10 +124,14 @@ export class DecisionLoopService extends Service {
     }
 
     if (invasiveReports.length > 0) {
+      if (!contractorWorkSafe) {
+        logger.info('[Dryad] Invasives detected but weather unsafe for contractor work — deferring email to next cycle');
+      } else {
       const parcelsAffected = [...new Set(invasiveReports.map((s) => s.nearestParcel))];
       const speciesList = [...new Set(invasiveReports.map((s) => s.species || 'Unknown species'))];
+      const seasonNote = season ? `\nSeason: ${season.season}. ${season.description}.` : '';
 
-      const emailBody = `INVASIVE SPECIES ALERT — Action Required
+      const emailBody = `INVASIVE SPECIES ALERT — Action Required${seasonNote}
 
 ${invasiveReports.length} invasive species observation(s) confirmed on the following parcels:
 
@@ -144,6 +159,7 @@ Budget: Up to $50 per parcel per visit.`;
       } catch (error) {
         logger.error({ error }, '[Dryad] Failed to send contractor email');
       }
+      } // end weather-safe check
     }
 
     if (proofOfWork.length > 0) {
