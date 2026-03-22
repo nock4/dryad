@@ -46,7 +46,7 @@
         /* ── HERO — Terminal split panel ── */
         .hero {
             width: 100%;
-            height: 100vh;
+            height: calc(100vh - 50px);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -54,12 +54,16 @@
 
         .hero-header {
             display: grid;
-            grid-template-columns: 200px 1fr auto;
+            grid-template-columns: 140px 1fr auto;
             align-items: center;
-            padding: 1.2rem 2rem;
+            padding: 0.9rem 2rem;
             border-bottom: 1px solid var(--card-border);
-            background: linear-gradient(to bottom, var(--bg-alt), var(--bg));
+            background: rgba(26,28,20,0.97);
+            backdrop-filter: blur(12px);
             flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo-area {
@@ -175,33 +179,7 @@
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
 
-        /* ── STICKY NAV ── */
-        .sticky-nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(26,28,20,0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--card-border);
-            padding: 12px 0;
-            overflow-x: auto;
-        }
-        .sticky-nav-inner {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            gap: 24px;
-            align-items: center;
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        .sticky-nav a { color: var(--text-muted); border-bottom: none; }
-        .sticky-nav a:hover { color: var(--accent); }
-        .sticky-nav .logo { font-size: 1.1rem; margin-right: 16px; font-family: var(--font-mono); font-weight: 700; color: var(--accent); text-transform: lowercase; font-style: normal; letter-spacing: -0.02em; }
+        /* sticky nav removed — hero-header is sticky */
 
         /* ── CONTENT SECTIONS ── */
         .content { max-width: 960px; margin: 0 auto; padding: 0 32px; }
@@ -358,6 +336,32 @@
             font-style: italic;
         }
 
+        /* ── Collapsible toggles ── */
+        details { margin: 20px 0; }
+        details summary {
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--text-main);
+            padding: 12px 0;
+            border-bottom: 1px solid var(--card-border);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::after {
+            content: '+';
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+        details[open] summary::after { content: '−'; }
+        details[open] summary { border-bottom-color: var(--accent); margin-bottom: 16px; }
+        details > div { padding-bottom: 8px; }
+
         .callout {
             background: rgba(34,36,26,0.7);
             border-left: 3px solid var(--accent);
@@ -407,8 +411,7 @@
 </head>
 <body>
 
-<!-- ═══════════════ HERO ═══════════════ -->
-<div class="hero">
+<!-- ═══════════════ NAV ═══════════════ -->
     <header class="hero-header">
         <div class="logo-area">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C10.5 2 9 3.5 9 5C9 6.5 10.5 8 12 8C13.5 8 15 6.5 15 5C15 3.5 13.5 2 12 2ZM6 10C4.5 10 3 11.5 3 13C3 14.5 4.5 16 6 16C7.5 16 9 14.5 9 13C9 11.5 7.5 10 6 10ZM18 10C16.5 10 15 11.5 15 13C15 14.5 16.5 16 18 16C19.5 16 21 14.5 21 13C21 11.5 19.5 10 18 10ZM12 16C10.5 16 9 17.5 9 19C9 20.5 10.5 22 12 22C13.5 22 15 20.5 15 19C15 17.5 13.5 16 12 16Z"/></svg>
@@ -417,13 +420,20 @@
         <div class="hero-nav">
             <a href="#problem">Problem</a>
             <a href="#parcels">Land</a>
+            <a href="#ecology">Ecology</a>
             <a href="#how">Loop</a>
+            <a href="#invasives">Invasives</a>
             <a href="#treasury">Treasury</a>
+            <a href="#finance">Finance</a>
+            <a href="#scaling">Scale</a>
+            <a href="#v2">V2</a>
             <a href="#bounties">Bounties</a>
         </div>
         <a class="pill-btn" href="http://5.75.225.23:3000" target="_blank">Enter Agent</a>
     </header>
 
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
     <main class="hero-main">
         <section class="hero-left">
             <h1 class="hero-title">The Forest<br>That Owns<br>Itself</h1>
@@ -456,24 +466,7 @@
     </footer>
 </div>
 
-<!-- ═══════════════ STICKY NAV ═══════════════ -->
-<nav class="sticky-nav">
-    <div class="sticky-nav-inner">
-        <span class="logo">Dryad.</span>
-        <a href="#problem">Problem</a>
-        <a href="#parcels">The Land</a>
-        <a href="#ecology">Ecology</a>
-        <a href="#how">How It Works</a>
-        <a href="#invasives">Invasives</a>
-        <a href="#treasury">Treasury</a>
-        <a href="#contractors">Contractors</a>
-        <a href="#finance">Financial Model</a>
-        <a href="#scaling">Scaling</a>
-        <a href="#v2">V2</a>
-        <a href="#bounties">Bounties</a>
-        <a href="#tech">Tech Stack</a>
-    </div>
-</nav>
+<!-- Sticky nav removed — hero header becomes sticky on scroll via JS -->
 
 <!-- ═══════════════ 2. THE PROBLEM ═══════════════ -->
 <section id="problem">
@@ -622,6 +615,9 @@
     <h2>Contractor Communication</h2>
     <p>Dryad sends and receives email autonomously. Every outgoing message includes a disclaimer identifying it as an AI agent with a human steward contact.</p>
 
+    <details>
+    <summary>Example: Invasive Removal Work Order</summary>
+    <div>
     <div class="email-card">
         <div class="email-header"><strong>From:</strong> dryad@agentmail.to<br><strong>To:</strong> contractor@example.com<br><strong>Subject:</strong> Invasive Species Removal — 3920 25th St, Detroit</div>
         <div class="email-body">Hello,
@@ -638,7 +634,12 @@ Payment: $45 USDC on Base upon verified photo submission.
 Submit proof-of-work photos at: http://5.75.225.23:3000/Dryad/submit</div>
         <div class="email-footer">This message was sent by Dryad, an autonomous AI agent managing native habitat restoration on vacant lots in Detroit as part of "The Forest That Owns Itself" project. For questions or concerns, contact Nick George (project steward) at powahgen@gmail.com.</div>
     </div>
+    </div>
+    </details>
 
+    <details>
+    <summary>Example: USFWS Native Planting Coordination</summary>
+    <div>
     <div class="email-card">
         <div class="email-header"><strong>From:</strong> dryad@agentmail.to<br><strong>To:</strong> meridith_holm@fws.gov<br><strong>Subject:</strong> Native Planting Plan — 25th St Parcels, Spring 2026</div>
         <div class="email-body">Hi Meridith,
@@ -657,6 +658,8 @@ Total area: ~9,900 sq ft. Seed from Prairie Moon Nursery, saplings from Cold Str
 Would you be able to review the species list and planting density for this site? Any USFWS considerations for the area?</div>
         <div class="email-footer">This message was sent by Dryad, an autonomous AI agent managing native habitat restoration on vacant lots in Detroit as part of "The Forest That Owns Itself" project. For questions or concerns, contact Nick George (project steward) at powahgen@gmail.com.</div>
     </div>
+    </div>
+    </details>
 </div>
 </section>
 
@@ -726,6 +729,9 @@ Would you be able to review the species list and planting density for this site?
 <div class="content">
     <h2>Financial Model</h2>
 
+    <details open>
+    <summary>Setup &amp; Operating Costs</summary>
+    <div>
     <div class="grid-2">
         <div>
             <h3>One-Time Setup Costs</h3>
@@ -766,8 +772,13 @@ Would you be able to review the species list and planting density for this site?
     <div class="callout" style="margin-top:24px">
         <strong>LVT Exemption:</strong> Under Detroit's proposed <a href="https://detroitmi.gov/departments/office-chief-financial-officer/land-value-tax-plan" target="_blank">Land Value Tax</a>, vacant land millage would increase from 85 to ~189 mills ($30 &rarr; $67/lot). However, <strong>urban farms, community gardens, and designated community spaces are exempt</strong> from the increase (<a href="https://www.bridgedetroit.com/detroits-land-value-tax-plan-explained/" target="_blank">BridgeDetroit</a>). Dryad-managed native habitat restoration lots would qualify.
     </div>
+    </div>
+    </details>
 
-    <h3 style="margin-top:40px">Self-Sustainability Threshold</h3>
+    <details>
+    <summary>Self-Sustainability &amp; Treasury Resilience</summary>
+    <div>
+    <h3 style="margin-top:8px">Self-Sustainability Threshold</h3>
     <p>At <a href="https://lido.fi/ethereum" target="_blank">3.5% stETH APR</a>, the Year 3+ cost of <strong>$945/yr</strong> needs <strong>$27,000 in stETH</strong> (~10.4 ETH at $2,600). Setup costs $17K once. The first two years need ~$1,445/yr for active management. By year 3, established prairie drops to $945/yr. <strong>Total to bootstrap and sustain forever: ~$47K.</strong></p>
 
     <h3 style="margin-top:32px">Treasury Resilience — 60/40 Split on $27K</h3>
@@ -781,7 +792,13 @@ Would you be able to review the species list and planting density for this site?
     <p><strong>Adaptive spending:</strong> NORMAL &rarr; CONSERVATION (pause discretionary contractor work) &rarr; CRITICAL (steward intervention). Non-negotiable floor: $383/yr (taxes + VPS + gas + LLC).</p>
     <p><strong>Even at -50% ETH, yield ($716) covers the non-negotiable floor ($383) with margin.</strong> Pause one contractor job and the land self-maintains through prairie resilience.</p>
 
-    <h3 style="margin-top:32px">Cost Per Lot Comparison</h3>
+    </div>
+    </details>
+
+    <details>
+    <summary>Cost Comparison, Revenue &amp; Land Acquisition</summary>
+    <div>
+    <h3 style="margin-top:8px">Cost Per Lot Comparison</h3>
     <table>
         <tr><th>Approach</th><th>Year 1–2/lot</th><th>Year 3+/lot</th><th>Ecological Value</th></tr>
         <tr><td>City mowing (status quo)</td><td>$67–170/yr</td><td>$67–170/yr forever</td><td>None</td></tr>
@@ -795,6 +812,8 @@ Would you be able to review the species list and planting density for this site?
     <h3 style="margin-top:32px">Land Acquisition Path</h3>
     <p><a href="https://detroitmi.gov/departments/planning-and-development-department/land-based-projects" target="_blank">Land-Based Projects program</a> &mdash; <a href="https://buildingdetroit.org/create-a-project" target="_blank">DLBA Create-a-Project</a>: $250/lot for LLC/501(c)(3). LLC: $50/yr. Must be current on city payments. Neighbor notification required 30 days before site work (&le;1 acre). Zoning: <a href="https://detroitdevelopment.org" target="_blank">detroitdevelopment.org</a>. Contact: <a href="mailto:LBP@detroitmi.gov">LBP@detroitmi.gov</a>.</p>
     <p>Community partners: <a href="https://www.keepgrowingdetroit.org/" target="_blank">Keep Growing Detroit</a>, <a href="https://detroitfuturecity.com/" target="_blank">Detroit Future City</a>, <a href="https://www.greeningofdetroit.com/" target="_blank">Greening of Detroit</a>, <a href="https://www.mi-community.org/" target="_blank">Michigan Community Resources</a>.</p>
+    </div>
+    </details>
 </div>
 </section>
 
@@ -1109,29 +1128,36 @@ Would you be able to review the species list and planting density for this site?
         maxZoom: 20
     }).addTo(map);
 
-    // 9 lots interpolated from EXACT ArcGIS parcel boundaries
-    // Source: Detroit Parcels API — tax parcels 12009264–12009267
-    // Street-side (W): (-83.0970863, 42.3376955) to (-83.0973933, 42.3381688)
-    // Back-side (E): (-83.0967453, 42.3378018) to (-83.0970524, 42.3382742)
-    var parcels = [
-        { addr: '3904', coords: [[42.3376955,-83.0970863],[42.3377481,-83.0971204],[42.3378543,-83.0967794],[42.3378018,-83.0967453]] },
-        { addr: '3908', coords: [[42.3377481,-83.0971204],[42.3378007,-83.0971545],[42.3379068,-83.0968135],[42.3378543,-83.0967794]] },
-        { addr: '3912', coords: [[42.3378007,-83.0971545],[42.3378533,-83.0971886],[42.3379593,-83.0968477],[42.3379068,-83.0968135]] },
-        { addr: '3916', coords: [[42.3378533,-83.0971886],[42.3379059,-83.0972227],[42.3380118,-83.0968818],[42.3379593,-83.0968477]] },
-        { addr: '3920', coords: [[42.3379059,-83.0972227],[42.3379584,-83.0972569],[42.3380642,-83.0969159],[42.3380118,-83.0968818]] },
-        { addr: '3924', coords: [[42.3379584,-83.0972569],[42.338011,-83.097291],[42.3381167,-83.09695],[42.3380642,-83.0969159]] },
-        { addr: '3928', coords: [[42.338011,-83.097291],[42.3380636,-83.0973251],[42.3381692,-83.0969842],[42.3381167,-83.09695]] },
-        { addr: '3932', coords: [[42.3380636,-83.0973251],[42.3381162,-83.0973592],[42.3382217,-83.0970183],[42.3381692,-83.0969842]] },
-        { addr: '3936', coords: [[42.3381162,-83.0973592],[42.3381688,-83.0973933],[42.3382742,-83.0970524],[42.3382217,-83.0970183]] }
+    // EXACT tax parcel polygons from Detroit ArcGIS Parcels API
+    // 4 tax parcels (12009264–12009267) containing the 9 original platted lots
+    var taxParcels = [
+        { id: '12009264', addr: '3906 (lots 3904–3910)', coords: [
+            [42.3378193,-83.0971672],[42.3378202,-83.0971635],[42.3379248,-83.0968288],
+            [42.3379256,-83.0968251],[42.3378018,-83.0967453],[42.3376955,-83.0970863]
+        ]},
+        { id: '12009265', addr: '3916 (lots 3912–3922)', coords: [
+            [42.3379431,-83.0972469],[42.3379440,-83.0972432],[42.3380486,-83.0969097],
+            [42.3380495,-83.0969060],[42.3379256,-83.0968251],[42.3379248,-83.0968288],
+            [42.3378202,-83.0971635],[42.3378193,-83.0971672]
+        ]},
+        { id: '12009266', addr: '3924 (lots 3924–3930)', coords: [
+            [42.3380669,-83.0973279],[42.3380678,-83.0973242],[42.3381715,-83.0969894],
+            [42.3381733,-83.0969857],[42.3380495,-83.0969060],[42.3380486,-83.0969097],
+            [42.3379440,-83.0972432],[42.3379431,-83.0972469]
+        ]},
+        { id: '12009267', addr: '3932 (lots 3932–3936)', coords: [
+            [42.3381688,-83.0973933],[42.3382742,-83.0970524],[42.3381733,-83.0969857],
+            [42.3381715,-83.0969894],[42.3380678,-83.0973242],[42.3380669,-83.0973279]
+        ]}
     ];
 
-    parcels.forEach(function(p) {
+    taxParcels.forEach(function(p) {
         L.polygon(p.coords, {
             color: '#8DA667',
             fillColor: '#8DA667',
             fillOpacity: 0.3,
             weight: 2
-        }).addTo(map).bindPopup('<b>' + p.addr + ' 25th St</b><br>~21×100 ft<br>Dryad-managed');
+        }).addTo(map).bindPopup('<b>' + p.addr + ' 25th St</b><br>Tax parcel ' + p.id + '<br>Dryad-managed');
     });
 
     // iNaturalist observation bounding box (wider than parcels)
