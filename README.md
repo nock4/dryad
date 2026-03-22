@@ -1,122 +1,146 @@
-# Project Starter
+# Dryad — The Forest That Owns Itself
 
-This is the starter template for ElizaOS projects.
+An autonomous AI agent that manages 9 vacant lots on 25th Street in Detroit for native habitat restoration. Dryad monitors biodiversity, coordinates invasive species removal, pays contractors, and records every milestone onchain — funded entirely by DeFi yield.
 
-## Features
+**Built for [The Synthesis Hackathon](https://synthesis.builders) (March 2026)**
 
-- Pre-configured project structure for ElizaOS development
-- Comprehensive testing setup with component and e2e tests
-- Default character configuration with plugin integration
-- Example service, action, and provider implementations
-- TypeScript configuration for optimal developer experience
-- Built-in documentation and examples
+## How It Works
 
-## Getting Started
-
-```bash
-# Create a new project
-elizaos create --type project my-project
-# Dependencies are automatically installed and built
-
-# Navigate to the project directory
-cd my-project
-
-# Start development immediately
-elizaos dev
+```
+Community volunteers photograph plants    Contractors complete removal work
+via iNaturalist app on the lots           and submit GPS-tagged proof photos
+         │                                           │
+         ▼                                           ▼
+   iNaturalist API ──────────────────────►  /Dryad/submit portal
+   (bounding box filter)                    (GPS verified to parcels)
+         │                                           │
+         ▼                                           ▼
+┌─────────────────────────────────────────────────────────┐
+│                    DRYAD AGENT                          │
+│  elizaOS v1.7.2 + Venice.ai (GLM 4.7 Flash)           │
+│                                                         │
+│  Decision Loop (every 6 hours):                        │
+│  1. Check iNaturalist for on-parcel observations       │
+│  2. Detect invasives → email contractor via AgentMail  │
+│  3. Review proof-of-work submissions                   │
+│  4. Check treasury health (stETH yield, DIEM stake)    │
+│  5. Record milestones onchain on Base L2               │
+│  6. Evaluate adaptive spending mode                    │
+└─────────────────────────────────────────────────────────┘
+         │                    │                    │
+    Email via            USDC payment         Milestone
+    AgentMail            on Base              on Base
 ```
 
-## Development
+## Onchain Contracts (Base Mainnet)
+
+| Contract | Address |
+|----------|---------|
+| DryadMilestones | [`0x7572dcac88720470d8cc827be5b02d474951bc22`](https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22) |
+| ERC-8004 Identity (#35293) | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) |
+| Agent Wallet | [`0xf2f7527D86e2173c91fF1c10Ede03f6f84510880`](https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880) |
+| DIEM Token | [`0xf4d97f2da56e8c3098f3a8d538db630a2606a024`](https://basescan.org/address/0xf4d97f2da56e8c3098f3a8d538db630a2606a024) |
+
+## Financial Model
+
+**Annual operating cost:** $645/yr (property taxes $270, VPS $58, DIEM $62, contractors $200, LLC $50, gas $5)
+
+**Self-sustainability target:** $18,429 in stETH at 3.5% APR = $645/yr yield. That's ~7.1 ETH.
+
+**Treasury resilience:** 60% stETH / 40% USDC split. USDC on Aave/Morpho for stable yield. Survives a 50% ETH crash at 2x capitalization.
+
+**Adaptive spending modes:**
+- **NORMAL** — all operations active, yield covers costs
+- **CONSERVATION** — pause discretionary contractor jobs, maintain monitoring + taxes + VPS
+- **CRITICAL** — steward intervention needed
+
+**Total to bootstrap and sustain forever: ~$35K** ($17K setup + $18K treasury)
+
+## Agent Actions
+
+| Action | Description |
+|--------|-------------|
+| `CHECK_BIODIVERSITY` | Pull iNaturalist observations filtered to parcel GPS bounding box, detect 7 invasive species, compute health score |
+| `MANAGE_STETH` | Check wstETH balance, calculate yield projections, enforce yield-only spending |
+| `MANAGE_DIEM` | Monitor DIEM stake for Venice AI inference credits |
+| `PAY_CONTRACTOR` | USDC payments on Base ($50/tx, $200/day limits) |
+| `RECORD_MILESTONE` | Record SiteAssessment, InvasiveRemoval, SoilPrep, NativePlanting, Monitoring onchain |
+| `VERIFY_ATTESTATION` | Verify GPS-tagged photo attestations against parcel boundaries |
+| `SEND_EMAIL` / `CHECK_EMAIL` | AgentMail integration at dryad@agentmail.to |
+
+## Web Pages
+
+| Path | Description |
+|------|-------------|
+| `/Dryad/dashboard` | Live dashboard: satellite map, health score, treasury, stress tests, milestones, iNaturalist observations |
+| `/Dryad/submit` | Contractor proof-of-work upload + community iNaturalist biodiversity survey |
+
+## Tech Stack
+
+- **[elizaOS](https://elizaos.ai) v1.7.2** — Agent framework
+- **[Venice.ai](https://venice.ai)** — LLM inference (GLM 4.7 Flash), DIEM token for self-sustaining credits
+- **[Base L2](https://base.org)** — All onchain transactions
+- **[Lido](https://lido.fi)** — wstETH for yield-generating treasury
+- **[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004)** — Onchain agent identity standard
+- **[iNaturalist](https://inaturalist.org)** — Biodiversity data (community-sourced, research-grade)
+- **[AgentMail](https://agentmail.to)** — Agent email (dryad@agentmail.to)
+- **[Mapbox](https://mapbox.com)** — Satellite imagery on dashboard
+
+## Parcels
+
+9 vacant lots on 25th Street between Ash and Beech, Detroit, MI (each 30x110 ft, 0.68 acres total):
+3904, 3908, 3912, 3916, 3920, 3924, 3928, 3932, 3936
+
+GPS bounding box: NW 42.3295,-83.1065 / SE 42.3285,-83.1050
+
+## iNaturalist Project
+
+[Dryad 25th Street Parcels Mapping](https://www.inaturalist.org/projects/dryad-25th-street-parcels-mapping)
+
+## Setup
 
 ```bash
-# Start development with hot-reloading (recommended)
-elizaos dev
+# Clone and install
+git clone https://github.com/vivicool12334/dryad.git
+cd dryad
+bun install
 
-# OR start without hot-reloading
+# Configure .env (copy from .env.example and add your keys)
+cp .env.example .env
+# Required: VENICE_API_KEY, EVM_PRIVATE_KEY, AGENTMAIL_API_KEY
+
+# Build and start
+bun run build
 elizaos start
-# Note: When using 'start', you need to rebuild after changes:
-# bun run build
-
-# Test the project
-elizaos test
 ```
 
-## Testing
+## Invasive Species Watchlist
 
-ElizaOS employs a dual testing strategy:
+| Species | Scientific Name | Threat |
+|---------|----------------|--------|
+| Tree of Heaven | *Ailanthus altissima* | Aggressive colonizer, allelopathic |
+| Amur Honeysuckle | *Lonicera maackii* | Outcompetes native understory |
+| Purple Loosestrife | *Lythrum salicaria* | Wetland invader |
+| Common Reed | *Phragmites australis* | Monoculture former |
+| Garlic Mustard | *Alliaria petiolata* | Disrupts mycorrhizal networks |
+| Japanese Knotweed | *Reynoutria japonica* | Structural damage, near-impossible to eradicate |
+| Common Buckthorn | *Rhamnus cathartica* | Alters soil nitrogen cycles |
 
-1. **Component Tests** (`src/__tests__/*.test.ts`)
+## Bounties
 
-   - Run with Bun's native test runner
-   - Fast, isolated tests using mocks
-   - Perfect for TDD and component logic
+| Bounty | Target |
+|--------|--------|
+| Venice AI (~$5,750) | Venice inference + DIEM self-management |
+| Protocol Labs: Let the Agent Cook ($2,000) | Complete autonomous decision loop + ERC-8004 |
+| Protocol Labs: Agents With Receipts ($2,000) | Every action recorded onchain |
+| Lido: stETH Agent Treasury ($2,000) | Yield-only spending, split treasury |
+| Base: Agent Services ($1,667) | All activity on Base mainnet |
+| Octant: Public Goods ($1,000) | Open-source urban ecology |
 
-2. **E2E Tests** (`src/__tests__/e2e/*.e2e.ts`)
-   - Run with ElizaOS custom test runner
-   - Real runtime with actual database (PGLite)
-   - Test complete user scenarios
+## License
 
-### Test Structure
+MIT
 
-```
-src/
-  __tests__/              # All tests live inside src
-    *.test.ts            # Component tests (use Bun test runner)
-    e2e/                 # E2E tests (use ElizaOS test runner)
-      project-starter.e2e.ts  # E2E test suite
-      README.md          # E2E testing documentation
-  index.ts               # Export tests here: tests: [ProjectStarterTestSuite]
-```
+## Steward
 
-### Running Tests
-
-- `elizaos test` - Run all tests (component + e2e)
-- `elizaos test component` - Run only component tests
-- `elizaos test e2e` - Run only E2E tests
-
-### Writing Tests
-
-Component tests use bun:test:
-
-```typescript
-// Unit test example (__tests__/config.test.ts)
-describe('Configuration', () => {
-  it('should load configuration correctly', () => {
-    expect(config.debug).toBeDefined();
-  });
-});
-
-// Integration test example (__tests__/integration.test.ts)
-describe('Integration: Plugin with Character', () => {
-  it('should initialize character with plugins', async () => {
-    // Test interactions between components
-  });
-});
-```
-
-E2E tests use ElizaOS test interface:
-
-```typescript
-// E2E test example (e2e/project.test.ts)
-export class ProjectTestSuite implements TestSuite {
-  name = 'project_test_suite';
-  tests = [
-    {
-      name: 'project_initialization',
-      fn: async (runtime) => {
-        // Test project in a real runtime
-      },
-    },
-  ];
-}
-
-export default new ProjectTestSuite();
-```
-
-The test utilities in `__tests__/utils/` provide helper functions to simplify writing tests.
-
-## Configuration
-
-Customize your project by modifying:
-
-- `src/index.ts` - Main entry point
-- `src/character.ts` - Character definition
+Nick George — powahgen@gmail.com

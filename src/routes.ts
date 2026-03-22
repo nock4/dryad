@@ -12,7 +12,8 @@ const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 // Ensure uploads dir exists
 try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch {}
 
-// iNaturalist observations URL for our parcels
+// iNaturalist URLs
+const INAT_PROJECT_URL = 'https://www.inaturalist.org/projects/dryad-25th-street-parcels-mapping';
 const INAT_OBS_URL = `https://www.inaturalist.org/observations?nelat=${PARCEL_BOUNDS.ne.lat}&nelng=${PARCEL_BOUNDS.ne.lng}&swlat=${PARCEL_BOUNDS.sw.lat}&swlng=${PARCEL_BOUNDS.sw.lng}`;
 const INAT_API_URL = `https://api.inaturalist.org/v1/observations?nelat=${PARCEL_BOUNDS.ne.lat}&nelng=${PARCEL_BOUNDS.ne.lng}&swlat=${PARCEL_BOUNDS.sw.lat}&swlng=${PARCEL_BOUNDS.sw.lng}`;
 
@@ -103,14 +104,15 @@ a{color:#81c784}
 
   <div class="qr-section">
     <div class="qr-placeholder">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(INAT_OBS_URL)}" alt="QR Code — iNaturalist observations near our parcels" width="180" height="180">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(INAT_PROJECT_URL)}" alt="QR Code — Dryad iNaturalist Project" width="180" height="180">
     </div>
-    <p style="font-size:13px;color:#81c784;margin-top:8px">Scan to view observations near our parcels</p>
+    <p style="font-size:13px;color:#81c784;margin-top:8px">Scan to join our iNaturalist project</p>
   </div>
 
   <div class="app-links">
     <a href="https://apps.apple.com/app/inaturalist/id421397028" target="_blank">iNaturalist for iOS</a>
     <a href="https://play.google.com/store/apps/details?id=org.inaturalist.android" target="_blank">iNaturalist for Android</a>
+    <a href="${INAT_PROJECT_URL}" target="_blank">Join Our Project</a>
     <a href="${INAT_OBS_URL}" target="_blank">View Observations</a>
   </div>
 
