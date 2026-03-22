@@ -10,6 +10,7 @@ import { verifyAttestationAction } from './actions/verifyAttestation.ts';
 import { sendEmailAction, checkEmailAction } from './actions/agentMail.ts';
 import { dryadRoutes } from './routes.ts';
 import { DecisionLoopService } from './services/decisionLoop.ts';
+import knowledgeProvider from './providers/knowledgeProvider.ts';
 
 const dryadPlugin: Plugin = {
   name: 'dryad',
@@ -33,6 +34,8 @@ const dryadPlugin: Plugin = {
     sendEmailAction,
     checkEmailAction,
   ],
+
+  providers: [knowledgeProvider],
 
   routes: dryadRoutes,
 

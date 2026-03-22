@@ -72,8 +72,15 @@ export const manageStETHAction: Action = {
       const monthlyYield = dailyYield * 30;
       const annualYield = balanceNum * ANNUAL_YIELD_RATE;
 
-      // Estimate ETH price (we'd normally fetch this, but approximate)
-      const estimatedEthPrice = 2500; // Approximate
+      // Fetch live ETH price, fallback to $2500
+      let estimatedEthPrice = 2500;
+      try {
+        const priceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { signal: AbortSignal.timeout(5000) });
+        if (priceRes.ok) {
+          const priceData = await priceRes.json() as any;
+          estimatedEthPrice = priceData?.ethereum?.usd || 2500;
+        }
+      } catch { /* use fallback */ }
       const dailyYieldUSD = dailyYield * estimatedEthPrice;
       const monthlyYieldUSD = monthlyYield * estimatedEthPrice;
 

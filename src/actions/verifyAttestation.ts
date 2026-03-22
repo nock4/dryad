@@ -185,13 +185,13 @@ ${!allPassed ? 'Please provide missing or corrected data to complete verificatio
       {
         name: '{{name1}}',
         content: {
-          text: 'Verify attestation: lat=42.3312 lng=-83.0465 timestamp=1711036800 hash=0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890 parcel 3920',
+          text: 'Verify attestation: lat=42.3312 lng=-83.0465 timestamp=1711036800 hash=0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890 parcel 4501',
         },
       },
       {
         name: 'Dryad',
         content: {
-          text: 'Verifying GPS-tagged attestation for parcel 3920 25th St...',
+          text: 'Verifying GPS-tagged attestation for parcel 4501 25th St...',
           actions: ['VERIFY_ATTESTATION'],
         },
       },

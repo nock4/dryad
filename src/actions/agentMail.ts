@@ -130,7 +130,7 @@ Message ID: ${result.message_id || 'sent'}`;
 
   examples: [
     [
-      { name: '{{name1}}', content: { text: 'Send an email to contractor@example.com subject: Invasive removal scheduled. The removal crew will arrive Monday at 9am for the 3920 lot.' } },
+      { name: '{{name1}}', content: { text: 'Send an email to contractor@example.com subject: Invasive removal scheduled. The removal crew will arrive Monday at 9am for the 4501 lot.' } },
       {
         name: 'Dryad',
         content: { text: 'Sending email to contractor@example.com about invasive removal scheduling...', actions: ['SEND_EMAIL'] },

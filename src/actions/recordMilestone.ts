@@ -8,15 +8,15 @@ const MILESTONE_TYPES = ['SiteAssessment', 'InvasiveRemoval', 'SoilPrep', 'Nativ
 type MilestoneType = (typeof MILESTONE_TYPES)[number];
 
 const PARCELS = [
-  '3904 25th St',
-  '3908 25th St',
-  '3912 25th St',
-  '3916 25th St',
-  '3920 25th St',
-  '3924 25th St',
-  '3928 25th St',
-  '3932 25th St',
-  '3936 25th St',
+  '4475 25th St',
+  '4481 25th St',
+  '4487 25th St',
+  '4493 25th St',
+  '4501 25th St',
+  '4509 25th St',
+  '4513 25th St',
+  '4521 25th St',
+  '4523 25th St',
 ];
 
 // DryadMilestones.sol ABI
@@ -162,17 +162,17 @@ This milestone is now permanently recorded on Base L2.`;
 
   examples: [
     [
-      { name: '{{name1}}', content: { text: 'Record site assessment complete for 3904 25th St' } },
+      { name: '{{name1}}', content: { text: 'Record site assessment complete for 4475 25th St' } },
       {
         name: 'Dryad',
-        content: { text: 'Recording SiteAssessment milestone for 3904 25th St onchain...', actions: ['RECORD_MILESTONE'] },
+        content: { text: 'Recording SiteAssessment milestone for 4475 25th St onchain...', actions: ['RECORD_MILESTONE'] },
       },
     ],
     [
-      { name: '{{name1}}', content: { text: 'Log invasive removal at 3920' } },
+      { name: '{{name1}}', content: { text: 'Log invasive removal at 4501' } },
       {
         name: 'Dryad',
-        content: { text: 'Recording InvasiveRemoval milestone for 3920 25th St on Base L2...', actions: ['RECORD_MILESTONE'] },
+        content: { text: 'Recording InvasiveRemoval milestone for 4501 25th St on Base L2...', actions: ['RECORD_MILESTONE'] },
       },
     ],
   ],
