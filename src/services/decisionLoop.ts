@@ -25,6 +25,10 @@ const STETH_APR = 0.035;
 const SUSTAINABILITY_THRESHOLD = ANNUAL_OPERATING_COST / STETH_APR; // ~$18,429
 const NON_NEGOTIABLE_ANNUAL = 270 + 58 + 5; // taxes + VPS + gas = $333/yr
 
+// Track spending mode across cycles to detect changes
+let lastSpendingMode: string = '';
+let lastYieldUSD: number = 0;
+
 export class DecisionLoopService extends Service {
   static serviceType = 'dryad-decision-loop';
   capabilityDescription = 'Autonomous 6-hour decision loop: monitors submissions, invasives, treasury health, DIEM stake, and contractor coordination.';
@@ -207,6 +211,36 @@ Budget: Up to $50 per parcel per visit.`;
       const mode = isSustainable ? 'NORMAL' : coversNonNegotiable ? 'CONSERVATION' : 'CRITICAL';
 
       logger.info(`[Dryad] Treasury: ${ethNum.toFixed(4)} ETH + ${wstethNum.toFixed(4)} wstETH = ~$${totalUSD.toFixed(0)} | Yield: ~$${annualYield.toFixed(0)}/yr | Mode: ${mode}`);
+
+      // Alert via email if spending mode changed
+      const modeChanged = lastSpendingMode !== '' && lastSpendingMode !== mode;
+      const yieldShift = lastYieldUSD > 0 && Math.abs(annualYield - lastYieldUSD) / lastYieldUSD > 0.1; // >10% change
+
+      if (modeChanged || yieldShift) {
+        const alertSubject = modeChanged
+          ? `[Dryad] Spending mode changed: ${lastSpendingMode} → ${mode}`
+          : `[Dryad] Yield shift: $${lastYieldUSD.toFixed(0)} → $${annualYield.toFixed(0)}/yr`;
+
+        const alertBody = `Dryad Treasury Alert
+
+Spending Mode: ${mode}${modeChanged ? ` (was ${lastSpendingMode})` : ''}
+Total Value: ~$${totalUSD.toFixed(0)}
+ETH: ${ethNum.toFixed(4)} | wstETH: ${wstethNum.toFixed(4)}
+Annual Yield: ~$${annualYield.toFixed(0)}/yr (3.5% APR on wstETH)
+Required: $${ANNUAL_OPERATING_COST}/yr | Non-negotiable: $${NON_NEGOTIABLE_ANNUAL}/yr
+
+${mode === 'NORMAL' ? 'All operations active.' : mode === 'CONSERVATION' ? 'Discretionary contractor jobs paused. Monitoring + taxes + VPS continue.' : 'CRITICAL: Yield insufficient for core costs. Steward intervention needed.'}`;
+
+        try {
+          await sendDryadEmail(CONTRACTOR_EMAIL, alertSubject, alertBody);
+          logger.info(`[Dryad] Sent treasury alert email: ${alertSubject}`);
+        } catch (e) {
+          logger.error({ error: e }, '[Dryad] Failed to send treasury alert');
+        }
+      }
+
+      lastSpendingMode = mode;
+      lastYieldUSD = annualYield;
 
       if (mode === 'CONSERVATION') {
         logger.warn('[Dryad] CONSERVATION MODE — pausing discretionary contractor jobs, maintaining monitoring + taxes + VPS');

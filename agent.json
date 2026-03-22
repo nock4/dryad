@@ -1,0 +1,55 @@
+{
+  "name": "Dryad",
+  "description": "Autonomous AI agent managing native habitat restoration on 9 vacant lots in Detroit",
+  "version": "1.0.0",
+  "identity": {
+    "erc8004_id": 35293,
+    "erc8004_registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+    "wallet": "0xf2f7527D86e2173c91fF1c10Ede03f6f84510880",
+    "chain": "base",
+    "email": "dryad@agentmail.to"
+  },
+  "capabilities": [
+    "checkBiodiversity",
+    "manageDIEM",
+    "manageStETH",
+    "recordMilestone",
+    "payContractor",
+    "verifyAttestation",
+    "sendEmail",
+    "checkEmail"
+  ],
+  "autonomous_loop": {
+    "interval": "6h",
+    "steps": [
+      "check_inaturalist",
+      "filter_invasives",
+      "check_agentmail",
+      "check_treasury",
+      "evaluate_spending_mode",
+      "check_diem_health",
+      "log_milestones"
+    ]
+  },
+  "contracts": {
+    "milestones": "0x7572dcac88720470d8cc827be5b02d474951bc22",
+    "diem": "0xf4d97f2da56e8c3098f3a8d538db630a2606a024"
+  },
+  "inference": {
+    "provider": "venice.ai",
+    "models": ["zai-org-glm-4.7-flash", "zai-org-glm-4.7"],
+    "self_funded": true,
+    "mechanism": "DIEM staking"
+  },
+  "treasury": {
+    "strategy": "60/40 stETH/USDC",
+    "yield_only": true,
+    "adaptive_spending": true,
+    "modes": ["NORMAL", "CONSERVATION", "CRITICAL"]
+  },
+  "operator": {
+    "name": "Nick George",
+    "role": "steward",
+    "contact": "powahgen@gmail.com"
+  }
+}

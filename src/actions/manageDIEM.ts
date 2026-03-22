@@ -1,6 +1,6 @@
 import type { Action, ActionResult, Content, HandlerCallback, IAgentRuntime, Memory, State } from '@elizaos/core';
 import { logger } from '@elizaos/core';
-import { createPublicClient, createWalletClient, http, parseAbi, formatUnits, parseUnits } from 'viem';
+import { createPublicClient, createWalletClient, http, parseAbi, formatUnits, parseUnits, parseEther } from 'viem';
 import { base } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -26,6 +26,49 @@ function getClients(runtime: IAgentRuntime) {
 
 function getDiemAddress(): `0x${string}` {
   return (process.env.DIEM_TOKEN_ADDRESS || '0xf4d97f2da56e8c3098f3a8d538db630a2606a024') as `0x${string}`;
+}
+
+// Uniswap V3 SwapRouter02 on Base
+const UNISWAP_ROUTER = '0x2626664c2603336E57B271c5C0b26F421741e481' as const;
+const WETH_BASE = '0x4200000000000000000000000000000000000006' as const;
+
+const SWAP_ROUTER_ABI = parseAbi([
+  'function exactInputSingle((address tokenIn, address tokenOut, uint24 fee, address recipient, uint256 amountIn, uint256 amountOutMinimum, uint160 sqrtPriceLimitX96)) payable returns (uint256 amountOut)',
+]);
+
+/**
+ * Buy DIEM with ETH via Uniswap V3 on Base.
+ * Returns real transaction hash — no mocks.
+ */
+export async function buyDIEMWithETH(runtime: IAgentRuntime, ethAmount: bigint): Promise<{ hash: string; amountOut: string }> {
+  const { account, publicClient, walletClient } = getClients(runtime);
+  const diemAddress = getDiemAddress();
+
+  const hash = await walletClient.writeContract({
+    address: UNISWAP_ROUTER,
+    abi: SWAP_ROUTER_ABI,
+    functionName: 'exactInputSingle',
+    args: [{
+      tokenIn: WETH_BASE,
+      tokenOut: diemAddress,
+      fee: 3000, // 0.3% fee tier
+      recipient: account.address,
+      amountIn: ethAmount,
+      amountOutMinimum: 0n,
+      sqrtPriceLimitX96: 0n,
+    }],
+    value: ethAmount,
+  });
+
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  logger.info(`[DIEM] Swap TX: ${hash} | Block: ${receipt.blockNumber} | Status: ${receipt.status}`);
+
+  // Read new balance
+  const newBalance = await publicClient.readContract({
+    address: diemAddress, abi: DIEM_ABI, functionName: 'balanceOf', args: [account.address],
+  }) as bigint;
+
+  return { hash, amountOut: formatUnits(newBalance, 18) };
 }
 
 export const manageDIEMAction: Action = {
@@ -88,6 +131,24 @@ export const manageDIEMAction: Action = {
         // stakedBalance function may not exist
       }
 
+      // Check if user wants to buy DIEM
+      const msgText = (message.content.text || '').toLowerCase();
+      const wantsToBuy = msgText.includes('buy') || msgText.includes('swap') || msgText.includes('purchase');
+
+      let buyResult = '';
+      if (wantsToBuy) {
+        // Extract amount or default to 0.001 ETH
+        const amountMatch = msgText.match(/(\d+\.?\d*)\s*eth/i);
+        const ethToBuy = amountMatch ? parseEther(amountMatch[1]) : parseEther('0.001');
+
+        try {
+          const { hash, amountOut } = await buyDIEMWithETH(runtime, ethToBuy);
+          buyResult = `\n\n### DIEM Purchase (Uniswap V3)\n**Swapped:** ${formatUnits(ethToBuy, 18)} ETH → DIEM\n**TX:** [\`${hash}\`](https://basescan.org/tx/${hash})\n**New Balance:** ${amountOut} DIEM\n**Router:** Uniswap V3 SwapRouter02 (\`${UNISWAP_ROUTER}\`)`;
+        } catch (swapErr) {
+          buyResult = `\n\n### DIEM Purchase Failed\n${swapErr instanceof Error ? swapErr.message : String(swapErr)}`;
+        }
+      }
+
       const dailyCredits = parseFloat(stakedBalance);
 
       const responseText = `## DIEM Token Status
@@ -103,7 +164,7 @@ ${
     : '✅ **Status:** Sufficient DIEM staked for daily inference costs.'
 }
 
-*1 DIEM staked = $1/day in Venice API credits*`;
+*1 DIEM staked = $1/day in Venice API credits*${buyResult}`;
 
       await callback({
         text: responseText,
