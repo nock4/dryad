@@ -697,49 +697,80 @@
         <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <style>
           @keyframes df { to { stroke-dashoffset: -40; } }
+          @keyframes df-r { to { stroke-dashoffset: 40; } }
           @keyframes df-f { to { stroke-dashoffset: -28; } }
+          @keyframes df-fr { to { stroke-dashoffset: 28; } }
           @keyframes df-s { to { stroke-dashoffset: -56; } }
+          @keyframes df-sr { to { stroke-dashoffset: 56; } }
           @keyframes pr { 0%,100%{opacity:0.2} 50%{opacity:0.06} }
           .cn { fill:none; stroke:#3d4d2e; stroke-width:2; stroke-dasharray:8,7; animation:df 3s linear infinite }
+          .cn-r { animation:df-r 3.5s linear infinite }
           .cn-f { animation:df-f 1.5s linear infinite; stroke-dasharray:6,5 }
+          .cn-fr { animation:df-fr 1.8s linear infinite; stroke-dasharray:6,5 }
           .cn-s { animation:df-s 5s linear infinite; stroke-dasharray:10,8 }
-          .cn-gold { stroke:#3d3520; }
-          .cn-org { stroke:#4d3028; }
+          .cn-sr { animation:df-sr 5.5s linear infinite; stroke-dasharray:10,8 }
+          .cn-gold { stroke:#3d3520 }
+          .cn-org { stroke:#4d3028 }
         </style>
       </defs>
 
-      <!-- ── CONNECTIONS ── -->
-      <!-- Agent ↔ Venice (inference, fast) -->
+      <!-- ── CONNECTIONS (bidirectional: forward + reverse paths) ── -->
+
+      <!-- Agent ↔ Venice (inference) -->
       <path class="cn cn-f" d="M440,370 Q300,270 190,190"/>
+      <path class="cn cn-fr" d="M440,375 Q302,275 192,195"/>
+
       <!-- Agent ↔ Base Contracts (milestones) -->
       <path class="cn" d="M560,370 Q700,270 810,190"/>
-      <!-- Agent ← iNaturalist (observations) -->
-      <path class="cn" d="M420,420 Q280,420 170,420"/>
+      <path class="cn cn-r" d="M558,375 Q698,275 808,195"/>
+
+      <!-- Agent ↔ iNaturalist (observations) -->
+      <path class="cn" d="M420,415 Q280,415 170,415"/>
+      <path class="cn cn-r" d="M420,425 Q280,425 170,425"/>
+
       <!-- Agent ↔ AgentMail (emails) -->
-      <path class="cn cn-org" d="M580,420 Q720,420 830,400"/>
-      <!-- Agent → DLBA (acquire) -->
-      <path class="cn cn-s" d="M500,350 Q500,250 500,130"/>
+      <path class="cn cn-org" d="M580,415 Q720,410 830,395"/>
+      <path class="cn cn-org cn-r" d="M580,425 Q720,420 830,405"/>
+
+      <!-- Agent ↔ DLBA (acquire) -->
+      <path class="cn cn-s" d="M495,350 Q495,250 495,130"/>
+      <path class="cn cn-sr" d="M505,350 Q505,250 505,130"/>
+
       <!-- Agent ↔ Treasury (yield) -->
-      <path class="cn cn-s cn-gold" d="M500,470 Q500,530 500,590"/>
-      <!-- Agent → Dashboard+Chat (bottom-left) -->
+      <path class="cn cn-s cn-gold" d="M495,470 Q495,530 495,590"/>
+      <path class="cn cn-sr cn-gold" d="M505,470 Q505,530 505,590"/>
+
+      <!-- Agent ↔ Dashboard+Chat -->
       <path class="cn" d="M430,460 Q310,530 210,590"/>
-      <!-- Treasury → Contractors (USDC payments) -->
-      <path class="cn cn-s cn-gold" d="M580,640 Q680,660 790,660"/>
-      <!-- AgentMail → Contractors (hire via email) -->
-      <path class="cn cn-org" d="M920,460 Q930,550 900,650"/>
-      <!-- Contractors → Photo Portal (proof photos) -->
-      <path class="cn" d="M870,720 Q700,740 530,730"/>
+      <path class="cn cn-r" d="M432,465 Q314,534 214,594"/>
+
+      <!-- Treasury ↔ Contractors (USDC) -->
+      <path class="cn cn-s cn-gold" d="M580,630 Q680,645 790,650"/>
+      <path class="cn cn-sr cn-gold" d="M580,640 Q680,655 790,660"/>
+
+      <!-- AgentMail ↔ Contractors (hire) -->
+      <path class="cn cn-org" d="M920,460 Q935,545 910,640"/>
+      <path class="cn cn-org cn-r" d="M925,460 Q940,545 915,640"/>
+
+      <!-- Agent ↔ Photo Portal -->
+      <path class="cn" d="M560,460 Q620,510 680,540"/>
+      <path class="cn cn-r" d="M562,465 Q622,514 682,544"/>
+
+      <!-- Contractors ↔ Photo Portal -->
+      <path class="cn" d="M790,650 Q750,610 720,570"/>
+      <path class="cn cn-r" d="M793,654 Q753,614 723,574"/>
 
       <!-- ── FLOW LABELS ── -->
       <text x="300" y="290" fill="#5a7040" font-family="Space Mono,monospace" font-size="11" transform="rotate(-25,300,290)">inference</text>
       <text x="660" y="290" fill="#5a7040" font-family="Space Mono,monospace" font-size="11" transform="rotate(25,660,290)">milestones</text>
-      <text x="270" y="408" fill="#5a7040" font-family="Space Mono,monospace" font-size="11">observations</text>
-      <text x="670" y="408" fill="#5a7040" font-family="Space Mono,monospace" font-size="11">emails</text>
+      <text x="270" y="405" fill="#5a7040" font-family="Space Mono,monospace" font-size="11">observations</text>
+      <text x="670" y="405" fill="#5a7040" font-family="Space Mono,monospace" font-size="11">emails</text>
       <text x="510" y="270" fill="#5a7040" font-family="Space Mono,monospace" font-size="11">acquire</text>
       <text x="510" y="540" fill="#6a5a30" font-family="Space Mono,monospace" font-size="11">yield</text>
-      <text x="670" y="652" fill="#6a5a30" font-family="Space Mono,monospace" font-size="11">USDC</text>
-      <text x="935" y="560" fill="#7a4a38" font-family="Space Mono,monospace" font-size="10">hire</text>
-      <text x="680" y="738" fill="#5a7040" font-family="Space Mono,monospace" font-size="10">proof photos</text>
+      <text x="670" y="638" fill="#6a5a30" font-family="Space Mono,monospace" font-size="11">USDC</text>
+      <text x="935" y="555" fill="#7a4a38" font-family="Space Mono,monospace" font-size="10">hire</text>
+      <text x="600" y="500" fill="#5a7040" font-family="Space Mono,monospace" font-size="10">verify</text>
+      <text x="745" y="600" fill="#5a7040" font-family="Space Mono,monospace" font-size="10">proof</text>
 
       <!-- ═══ CENTRAL: Dryad Agent ═══ -->
       <g transform="translate(500,410)">
@@ -816,11 +847,12 @@
         <text x="0" y="38" text-anchor="middle" fill="#c4a84d" font-family="Space Mono,monospace" font-size="10">$50/tx · $200/day</text>
       </g>
 
-      <!-- ═══ Photo Portal (proof-of-work) ═══ -->
-      <g transform="translate(500,730)">
-        <rect x="-95" y="-30" width="190" height="60" rx="8" fill="#242820" stroke="#8fbc6b" stroke-width="1.5"/>
-        <text x="0" y="-6" text-anchor="middle" fill="#8fbc6b" font-family="Instrument Serif,serif" font-size="18">Photo Portal</text>
-        <text x="0" y="14" text-anchor="middle" fill="#a8a896" font-family="Space Mono,monospace" font-size="10">GPS verify · proof-of-work</text>
+      <!-- ═══ Photo Portal (between Agent and Contractors) ═══ -->
+      <g transform="translate(700,555)">
+        <rect x="-95" y="-34" width="190" height="68" rx="10" fill="#242820" stroke="#8fbc6b" stroke-width="2"/>
+        <text x="0" y="-10" text-anchor="middle" fill="#8fbc6b" font-family="Instrument Serif,serif" font-size="18">Photo Portal</text>
+        <text x="0" y="10" text-anchor="middle" fill="#a8a896" font-family="Space Mono,monospace" font-size="11">/Dryad/submit</text>
+        <text x="0" y="26" text-anchor="middle" fill="#8fbc6b" font-family="Space Mono,monospace" font-size="10">GPS verify · proof-of-work</text>
       </g>
     </svg>
     </div>
