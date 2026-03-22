@@ -38,7 +38,7 @@ via iNaturalist app on the lots           and submit GPS-tagged proof photos
 |----------|---------|
 | DryadMilestones | [`0x7572dcac88720470d8cc827be5b02d474951bc22`](https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22) |
 | ERC-8004 Identity (#35293) | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) |
-| Agent Wallet | [`0xf2f7527D86e2173c91fF1c10Ede03f6f84510880`](https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880) |
+| Agent Wallet | [`dryadforest.eth`](https://app.ens.domains/dryadforest.eth) / [`0xf2f7527D86e2173c91fF1c10Ede03f6f84510880`](https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880) |
 | DIEM Token | [`0xf4d97f2da56e8c3098f3a8d538db630a2606a024`](https://basescan.org/address/0xf4d97f2da56e8c3098f3a8d538db630a2606a024) |
 
 ## Financial Model

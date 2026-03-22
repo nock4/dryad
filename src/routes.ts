@@ -276,6 +276,7 @@ th{color:#81c784}
     <h2>Agent Identity</h2>
     <table>
       <tr><th>Name</th><td>Dryad — "The Forest That Owns Itself"</td></tr>
+      <tr><th>ENS</th><td><strong>dryadforest.eth</strong></td></tr>
       <tr><th>Email</th><td>dryad@agentmail.to</td></tr>
       <tr><th>Wallet</th><td><code id="walletAddr">Loading...</code></td></tr>
       <tr><th>ERC-8004 Agent ID</th><td>#${process.env.ERC8004_AGENT_ID || '35293'} on Base</td></tr>
