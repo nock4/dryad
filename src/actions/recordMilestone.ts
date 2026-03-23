@@ -56,7 +56,7 @@ function parseMilestoneFromMessage(text: string): { type: MilestoneType | null; 
 
   let parcel: string | null = null;
   for (const p of PARCELS) {
-    const addr = p.split(' ')[0]; // e.g., "3904"
+    const addr = p.split(' ')[0]; // e.g., "4475"
     if (text.includes(addr)) {
       parcel = p;
       break;

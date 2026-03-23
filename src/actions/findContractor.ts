@@ -66,7 +66,7 @@ ${seasonNote ? `Note: ${seasonNote}` : ''}
 Payment is in USDC on Base (Ethereum L2). If you don't have a crypto wallet, services like Holyheld (holyheld.com) or Gnosis Pay (gnosispay.com) let you spend USDC directly with a debit card.
 
 After completing work, please submit GPS-tagged before/after photos at:
-http://5.75.225.23:3000/Dryad/submit
+${process.env.SERVER_URL || 'http://5.75.225.23:3000'}/Dryad/submit
 
 This is a small initial project. If the work goes well, we have ongoing seasonal maintenance needs across all 9 lots.
 

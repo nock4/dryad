@@ -595,7 +595,8 @@ export const dryadRoutes = [
 
         const ethNum = parseFloat(formatEther(ethBal));
         const wstethNum = parseFloat(formatEther(wstethBal));
-        const ethPrice = 2500;
+        let ethPrice = 2500;
+        try { const pr = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',{signal:AbortSignal.timeout(3000)}); if(pr.ok){const d=await pr.json() as any;ethPrice=d?.ethereum?.usd||2500;} } catch{}
         const dailyYield = (wstethNum * 0.035) / 365 * ethPrice;
 
         res.json({

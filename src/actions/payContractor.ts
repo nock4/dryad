@@ -3,6 +3,8 @@ import { logger } from '@elizaos/core';
 import { createPublicClient, createWalletClient, http, parseAbi, formatUnits, parseUnits } from 'viem';
 import { base } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
+import { validateTransaction, recordTransaction, recordFailedTransaction } from '../security/transactionGuard.ts';
+import { audit } from '../services/auditLog.ts';
 
 const USDC_ABI = parseAbi([
   'function balanceOf(address owner) view returns (uint256)',
@@ -122,6 +124,15 @@ export const payContractorAction: Action = {
         return { text: errorMsg, values: { success: false }, data: {}, success: false };
       }
 
+      // SECURITY: Transaction guard validation
+      const txCheck = validateTransaction(address, amount);
+      if (!txCheck.allowed) {
+        audit('TRANSACTION_BLOCKED', `${txCheck.reason} | $${amount} to ${address}`, 'payContractor', 'warn');
+        const errorMsg = `Payment blocked: ${txCheck.reason}`;
+        await callback({ text: errorMsg, actions: ['PAY_CONTRACTOR'], source: message.content.source });
+        return { text: errorMsg, values: { success: false }, data: {}, success: false };
+      }
+
       // Send USDC
       const amountWei = parseUnits(amount.toString(), usdcDecimals);
       const hash = await walletClient.writeContract({
@@ -133,8 +144,10 @@ export const payContractorAction: Action = {
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      // Update daily spend tracker
+      // Update daily spend tracker + transaction guard
       dailySpend += amount;
+      recordTransaction(address, amount, hash);
+      audit('TRANSACTION_SUCCESS', `$${amount} USDC to ${address}`, 'payContractor', 'info', { txHash: hash, amount, recipient: address });
 
       const responseText = `## Contractor Payment Sent
 
@@ -165,6 +178,8 @@ export const payContractorAction: Action = {
       };
     } catch (error) {
       logger.error({ error }, 'Error in PAY_CONTRACTOR action');
+      recordFailedTransaction(error instanceof Error ? error.message : String(error));
+      audit('TRANSACTION_FAILED', `${error instanceof Error ? error.message : String(error)}`, 'payContractor', 'warn');
       const errorMsg = `Failed to send payment: ${error instanceof Error ? error.message : String(error)}`;
       await callback({ text: errorMsg, actions: ['PAY_CONTRACTOR'], source: message.content.source });
       return {
