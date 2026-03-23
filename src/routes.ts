@@ -773,7 +773,23 @@ export const dryadRoutes = [
           return;
         }
 
-        const systemPrompt = `You are Dryad, an autonomous AI agent managing 9 vacant lots at 4475-4523 25th Street in Detroit's Chadsey-Condon neighborhood. You restore native lakeplain oak opening habitat using DeFi yield from stETH. You are registered onchain as ERC-8004 Agent #35293 on Base. Your ENS name is dryadforest.eth. You monitor biodiversity via iNaturalist, manage contractors for invasive removal and native plantings, and record milestones onchain. Be helpful, knowledgeable about Detroit ecology and vacant land, and enthusiastic about conservation. Keep responses concise (2-4 sentences for simple questions, longer for complex ones).`;
+        // Use the full character system prompt so the model has all knowledge
+        const { character } = await import('./character.ts');
+        const systemPrompt = (character.system || '') + `
+
+CHAT BEHAVIOR:
+- Keep responses concise: 2-4 sentences for simple questions, longer for complex ones.
+- When you provide a URL, write the FULL url (e.g. https://buildingdetroit.org) — do NOT use markdown link syntax since it won't render.
+- NEVER invent URLs, addresses, contract hashes, or facts. Only use information from this system prompt. If you don't know, say so.
+- NEVER output non-English characters. Respond only in English.
+
+KEY URLS (use these exactly when relevant):
+- iNaturalist project: https://www.inaturalist.org/projects/dryad-25th-street-parcels-mapping
+- Wallet on BaseScan: https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880
+- Milestones contract: https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22
+- DLBA / get a lot: https://buildingdetroit.org
+- Seek app (plant ID): https://www.inaturalist.org/pages/seek_app
+- GitHub: https://github.com/vivicool12334/dryad`;
 
         // Build conversation history from client
         const rawHistory = Array.isArray(body.history) ? body.history : [];
@@ -839,6 +855,9 @@ export const dryadRoutes = [
         if (!responseText) {
           responseText = "I'm having trouble thinking right now. Try asking about the project, Detroit's vacant lots, or native ecology!";
         }
+
+        // Strip non-Latin characters (GLM model sometimes leaks Chinese)
+        responseText = responseText.replace(/[^\x00-\x7F\u00C0-\u024F\u2000-\u206F\u2190-\u21FF\u2500-\u257F°±×÷—–''""…•→←↑↓★☆·]+/g, '').replace(/\s{2,}/g, ' ').trim();
 
         audit('LOOP_EXECUTION', `Chat: ${text.slice(0, 50)} | IP: ${ip}`, 'chat_api', 'info');
         res.json({ text: responseText } as unknown);

@@ -1655,11 +1655,24 @@ function match(input){
   return best&&bestS>0?best.r:"I can help with:\n• The Dryad project\n• Detroit vacant land & DLBA process\n• Native plants & ecology\n• Invasive species\n• Blockchain & governance\n• How to get involved\n\nTry asking about one of these!";
 }
 
+function renderChat(text){
+  // Sanitize HTML first
+  var tmp=document.createElement('div');tmp.textContent=text;var safe=tmp.innerHTML;
+  // Bold: **text**
+  safe=safe.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  // Italic: *text*
+  safe=safe.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  // Bare URLs → clickable links
+  safe=safe.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">$1</a>');
+  // Newlines
+  safe=safe.replace(/\n/g,'<br>');
+  return safe;
+}
 function addMsg(role,text,isTyping){
   var el=document.getElementById('chat-messages');
   var d=document.createElement('div');
   d.className='chat-msg '+role+(isTyping?' typing':'');
-  d.textContent=text;
+  if(isTyping||role==='user'){d.textContent=text;}else{d.innerHTML=renderChat(text);}
   el.appendChild(d);
   el.scrollTop=el.scrollHeight;
   return d;
