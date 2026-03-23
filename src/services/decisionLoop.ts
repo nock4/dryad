@@ -17,9 +17,13 @@ import { PARCEL_BOUNDS } from '../parcels.ts';
 import { getWeatherAssessment } from '../actions/checkWeather.ts';
 import { getCurrentSeason, getSeasonalBriefing } from '../utils/seasonalAwareness.ts';
 import { recordLoopExecution, recordApiCall } from '../actions/selfAssess.ts';
+import { generateWeeklyReport } from '../actions/generateReport.ts';
 
 const CYCLE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
+
+// Weekly report tracking
+let weeklyReportSentDate = '';
 
 // Financial model constants
 // Year 3+ steady-state costs (established prairie)
@@ -90,6 +94,9 @@ export class DecisionLoopService extends Service {
 
       // 4. Check DIEM stake
       await this.checkDIEMHealth();
+
+      // 5. Weekly report check (Monday 8-9am ET)
+      await this.checkWeeklyReport();
 
       const elapsed = ((Date.now() - cycleStart) / 1000).toFixed(1);
       logger.info(`[Dryad] ═══ Decision loop cycle complete (${elapsed}s) ═══`);
@@ -301,6 +308,30 @@ ${mode === 'NORMAL' ? 'All operations active.' : mode === 'CONSERVATION' ? 'Disc
       }
     } catch (error) {
       logger.error({ error }, '[Dryad] DIEM check failed');
+    }
+  }
+
+  private async checkWeeklyReport() {
+    try {
+      const now = new Date();
+      const detroit = new Date(now.toLocaleString('en-US', { timeZone: 'America/Detroit' }));
+      const isMonday = detroit.getDay() === 1;
+      const hour = detroit.getHours();
+      const today = detroit.toDateString();
+
+      if (isMonday && hour >= 8 && hour < 12 && weeklyReportSentDate !== today) {
+        logger.info('[Dryad] Monday morning — generating weekly report');
+        const report = await generateWeeklyReport();
+        await sendDryadEmail(
+          CONTRACTOR_EMAIL,
+          `[Dryad] Weekly Report — ${detroit.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+          report
+        );
+        weeklyReportSentDate = today;
+        logger.info('[Dryad] Weekly report sent');
+      }
+    } catch (error) {
+      logger.error({ error }, '[Dryad] Weekly report failed');
     }
   }
 }
