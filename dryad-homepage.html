@@ -60,7 +60,7 @@
 
         .hero-header {
             display: grid;
-            grid-template-columns: 140px 1fr auto;
+            grid-template-columns: 140px 1fr;
             align-items: center;
             padding: 0.9rem 2rem;
             border-bottom: 1px solid var(--card-border);
@@ -82,16 +82,14 @@
             letter-spacing: -0.02em;
             color: var(--accent);
         }
+        .logo-area:hover { border-bottom: none !important; color: var(--accent-light); }
 
         .logo-area svg { width: 22px; height: 22px; fill: var(--accent-amber); animation: logo-spin 30s linear infinite; }
         @keyframes logo-spin { to { transform: rotate(360deg); } }
 
-        .hero-nav { display: flex; justify-content: center; gap: 2.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .hero-nav { display: flex; justify-content: flex-end; gap: 2.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
         .hero-nav a { color: var(--text-muted); border-bottom: none; }
         .hero-nav a:hover { color: var(--accent-amber); text-decoration: underline; text-underline-offset: 4px; }
-
-        .pill-btn { border: 1px solid var(--accent-amber); padding: 0.5rem 1.2rem; border-radius: 50px; font-family: inherit; font-size: 0.8rem; background: transparent; color: var(--accent-amber); cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; transition: all 0.2s; }
-        .pill-btn:hover { background: var(--accent-amber); color: var(--bg); border-bottom: none; }
 
         .hero-main {
             display: grid;
@@ -310,9 +308,9 @@
         }
         .chat-sug-btn {
             padding: 5px 10px;
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(141,166,103,0.3);
             border-radius: 14px;
-            background: transparent;
+            background: rgba(141,166,103,0.06);
             color: var(--accent);
             font-size: 0.72rem;
             cursor: pointer;
@@ -695,7 +693,7 @@
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
             .hero-main { grid-template-columns: 1fr; }
             .hero-right { min-height: 50vh; max-height: 500px; }
-            .hero-header { grid-template-columns: auto 1fr auto; }
+            .hero-header { grid-template-columns: auto 1fr; }
             .hero-nav { gap: 1rem; font-size: 0.65rem; overflow-x: auto; }
             .hero-title { font-size: 2.4rem; }
             .content { padding: 0 20px; }
@@ -705,7 +703,6 @@
         }
         @media (max-width: 480px) {
             .hero-nav { gap: 0.8rem; font-size: 0.6rem; }
-            .pill-btn { padding: 0.3rem 0.7rem; font-size: 0.6rem; }
             .hero-footer { flex-direction: column; gap: 4px; align-items: center; }
         }
     </style>
@@ -1509,7 +1506,7 @@ Would you be able to review the species list and planting density for this site?
         </div>
         <div style="text-align:right">
             <p><a href="https://github.com/vivicool12334/dryad" target="_blank">GitHub</a> &bull; <a href="mailto:dryad@agentmail.to">dryad@agentmail.to</a></p>
-            <p><a href="http://5.75.225.23:3000" target="_blank">Agent UI</a> &bull; <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank">Dashboard</a></p>
+            <p><a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank">Dashboard</a> &bull; <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank">Submit Portal</a></p>
             <p><a href="https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22" target="_blank">BaseScan</a> &bull; dryadforest.eth</p>
         </div>
     </div>
