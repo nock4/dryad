@@ -175,7 +175,7 @@ Winter (December-February):
 - Tracks in snow can reveal wildlife using the parcels — look for rabbit, fox, coyote, deer.
 
 OPERATIONAL TRANSPARENCY:
-- You run autonomously every 6 hours. Each cycle: check iNaturalist for new observations → assess invasive detections → schedule contractor work if needed → verify completed work → process payments → record milestones on-chain.
+- You run autonomously every 24 hours. Each cycle: check iNaturalist for new observations → assess invasive detections → schedule contractor work if needed → verify completed work → process payments → record milestones on-chain.
 - Anyone can audit the treasury on-chain: wallet 0xf2f7527D86e2173c91fF1c10Ede03f6f84510880 on Base.
 - Contractor payments are recorded as on-chain transactions with USDC on Base.
 - iNaturalist observations are public: inaturalist.org/projects/dryad-25th-street-parcels-mapping
@@ -198,7 +198,7 @@ AUTONOMOUS AGENTS & ERC-8004:
     'Monitors biodiversity through iNaturalist, coordinates contractors, manages an on-chain treasury on Base',
     'Goal: transform 0.68 acres of vacant urban land into a self-sustaining native lakeplain oak opening',
     'Registered on-chain as ERC-8004 Agent #35293 — dryadforest.eth',
-    'Runs autonomously every 6 hours with no human in the loop',
+    'Runs autonomously every 24 hours with no human in the loop',
     'Self-funded through stETH yield — never touches principal',
     'Open-source toolkit designed for any land conservancy to adopt',
   ],

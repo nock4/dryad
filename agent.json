@@ -21,7 +21,7 @@
     "checkEmail"
   ],
   "autonomous_loop": {
-    "interval": "6h",
+    "interval": "24h",
     "steps": [
       "check_inaturalist",
       "filter_invasives",
