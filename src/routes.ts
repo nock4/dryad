@@ -709,7 +709,7 @@ export const dryadRoutes = [
         }
 
         // Security: check for injection attempts
-        if (isInjectionAttempt(text)) {
+        if (isInjectionAttempt(text).detected) {
           audit('INJECTION_BLOCKED', { input: text.slice(0, 100), ip });
           res.json({ text: "I'm Dryad, an autonomous land stewardship agent. I can tell you about the project, Detroit's vacant land crisis, native ecology, or how to get involved. What would you like to know?" } as unknown);
           return;

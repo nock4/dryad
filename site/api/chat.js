@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   try {
     const { text } = req.body || {};
     if (!text) return res.status(400).json({ error: 'Missing text field' });
-    const response = await fetch('http://5.75.225.23:3000/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }), signal: AbortSignal.timeout(14000) });
+    const response = await fetch('http://5.75.225.23:3000/Dryad/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }), signal: AbortSignal.timeout(14000) });
     if (!response.ok) throw new Error('Agent returned ' + response.status);
     const data = await response.json();
     return res.status(200).json(data);
