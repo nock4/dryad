@@ -21,7 +21,7 @@
     "checkEmail"
   ],
   "autonomous_loop": {
-    "interval": "6h",
+    "interval": "24h",
     "steps": [
       "check_inaturalist",
       "filter_invasives",
@@ -51,6 +51,6 @@
   "operator": {
     "name": "Nick George",
     "role": "steward",
-    "contact": "powahgen@gmail.com"
+    "contact": "https://x.com/0xnock"
   }
 }

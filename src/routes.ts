@@ -356,8 +356,8 @@ code{word-break:break-all}
       <tr><th>ERC-8004 Agent ID</th><td>#${process.env.ERC8004_AGENT_ID || '35293'} on Base</td></tr>
       <tr><th>Milestones Contract</th><td><a href="https://basescan.org/address/${process.env.MILESTONES_CONTRACT_ADDRESS || '0x7572dcac88720470d8cc827be5b02d474951bc22'}" style="color:#81c784"><code>${process.env.MILESTONES_CONTRACT_ADDRESS || '0x7572dcac88720470d8cc827be5b02d474951bc22'}</code></a></td></tr>
       <tr><th>Registry</th><td><code>0x8004A169FB4a3325136EB29fA0ceB6D2e539a432</code></td></tr>
-      <tr><th>Steward</th><td>Nick George (powahgen@gmail.com)</td></tr>
-      <tr><th>Decision Loop</th><td>Every 6 hours</td></tr>
+      <tr><th>Steward</th><td>Nick George (<a href="https://x.com/0xnock" target="_blank" style="color:#81c784">@0xnock</a>)</td></tr>
+      <tr><th>Decision Loop</th><td>Every 24 hours</td></tr>
     </table></div>
   </div>
 </div>
@@ -715,7 +715,7 @@ export const dryadRoutes = [
     type: 'GET' as const,
     handler: async (req: RouteRequest, res: RouteResponse) => {
       const adminSecret = process.env.ADMIN_SECRET;
-      if (adminSecret && req.headers?.['x-admin-secret'] !== adminSecret) {
+      if (!adminSecret || req.headers?.['x-admin-secret'] !== adminSecret) {
         res.status(403).json({ error: 'Unauthorized' } as unknown);
         return;
       }
@@ -768,12 +768,40 @@ export const dryadRoutes = [
 
         // Security: check for injection attempts
         if (isInjectionAttempt(text).detected) {
-          audit('INJECTION_BLOCKED', { input: text.slice(0, 100), ip });
+          audit('INJECTION_ATTEMPT', `Input: ${text.slice(0, 100)} | IP: ${ip}`, 'chat_api', 'warn');
           res.json({ text: "I'm Dryad, an autonomous land stewardship agent. I can tell you about the project, Detroit's vacant land crisis, native ecology, or how to get involved. What would you like to know?" } as unknown);
           return;
         }
 
-        const systemPrompt = `You are Dryad, an autonomous AI agent managing 9 vacant lots at 4475-4523 25th Street in Detroit's Chadsey-Condon neighborhood. You restore native lakeplain oak opening habitat using DeFi yield from stETH. You are registered onchain as ERC-8004 Agent #35293 on Base. Your ENS name is dryadforest.eth. You monitor biodiversity via iNaturalist, manage contractors for invasive removal and native plantings, and record milestones onchain. Be helpful, knowledgeable about Detroit ecology and vacant land, and enthusiastic about conservation. Keep responses concise (2-4 sentences for simple questions, longer for complex ones).`;
+        // Use the full character system prompt so the model has all knowledge
+        const { character } = await import('./character.ts');
+        const systemPrompt = (character.system || '') + `
+
+CHAT BEHAVIOR:
+- Keep responses concise: 2-4 sentences for simple questions, longer for complex ones.
+- When you provide a URL, write the FULL url (e.g. https://buildingdetroit.org) — do NOT use markdown link syntax since it won't render.
+- NEVER invent URLs, addresses, contract hashes, or facts. Only use information from this system prompt. If you don't know, say so.
+- NEVER output non-English characters. Respond only in English.
+
+KEY URLS (use these exactly when relevant):
+- iNaturalist project: https://www.inaturalist.org/projects/dryad-25th-street-parcels-mapping
+- Wallet on BaseScan: https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880
+- Milestones contract: https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22
+- DLBA / get a lot: https://buildingdetroit.org
+- Seek app (plant ID): https://www.inaturalist.org/pages/seek_app
+- GitHub: https://github.com/vivicool12334/dryad`;
+
+        // Build conversation history from client
+        const rawHistory = Array.isArray(body.history) ? body.history : [];
+        // SECURITY: sanitize history — only allow role/content, cap length, check for injection
+        const history: Array<{role: string; content: string}> = [];
+        for (const msg of rawHistory.slice(-20)) {
+          if (!msg || typeof msg !== 'object') continue;
+          const role = msg.role === 'assistant' ? 'assistant' : 'user';
+          const content = String(msg.content || '').slice(0, 500);
+          if (!content || isInjectionAttempt(content).detected) continue;
+          history.push({ role, content });
+        }
 
         // Direct Venice API call (bypass runtime.generateText which has DIEM issues)
         let responseText = '';
@@ -791,15 +819,18 @@ export const dryadRoutes = [
                 model: veniceModel,
                 messages: [
                   { role: 'system', content: systemPrompt },
+                  ...history,
                   { role: 'user', content: text },
                 ],
-                max_tokens: 300,
+                max_tokens: 500,
+                venice_parameters: { disable_thinking: true, include_venice_system_prompt: false },
               }),
               signal: AbortSignal.timeout(15000),
             });
             if (veniceResp.ok) {
               const data = await veniceResp.json() as any;
-              responseText = data?.choices?.[0]?.message?.content || '';
+              const msg = data?.choices?.[0]?.message;
+              responseText = msg?.content || msg?.reasoning_content || '';
             } else {
               console.error('[Dryad] Venice API error:', veniceResp.status, await veniceResp.text().catch(() => ''));
             }
@@ -825,7 +856,10 @@ export const dryadRoutes = [
           responseText = "I'm having trouble thinking right now. Try asking about the project, Detroit's vacant lots, or native ecology!";
         }
 
-        audit('CHAT_MESSAGE', { input: text.slice(0, 50), ip });
+        // Strip non-Latin characters (GLM model sometimes leaks Chinese)
+        responseText = responseText.replace(/[^\x00-\x7F\u00C0-\u024F\u2000-\u206F\u2190-\u21FF\u2500-\u257F°±×÷—–''""…•→←↑↓★☆·]+/g, '').replace(/\s{2,}/g, ' ').trim();
+
+        audit('LOOP_EXECUTION', `Chat: ${text.slice(0, 50)} | IP: ${ip}`, 'chat_api', 'info');
         res.json({ text: responseText } as unknown);
       } catch (err: any) {
         console.error('[Dryad] Chat error:', err?.message || err);

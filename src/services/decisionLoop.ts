@@ -1,6 +1,6 @@
 /**
  * Autonomous Decision Loop for Dryad.
- * Runs every 6 hours:
+ * Runs every 24 hours:
  * 1. Check for new verified photo submissions → email contractor if invasives
  * 2. Check iNaturalist for on-parcel observations
  * 3. Check AgentMail for new messages
@@ -20,7 +20,7 @@ import { recordLoopExecution, recordApiCall } from '../actions/selfAssess.ts';
 import { generateWeeklyReport } from '../actions/generateReport.ts';
 import { audit } from './auditLog.ts';
 
-const CYCLE_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const CYCLE_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
 
 // Weekly report tracking
@@ -41,7 +41,7 @@ let lastYieldUSD: number = 0;
 
 export class DecisionLoopService extends Service {
   static serviceType = 'dryad-decision-loop';
-  capabilityDescription = 'Autonomous 6-hour decision loop: monitors submissions, invasives, treasury health, DIEM stake, and contractor coordination.';
+  capabilityDescription = 'Autonomous 24-hour decision loop: monitors submissions, invasives, treasury health, DIEM stake, and contractor coordination.';
 
   private timer: ReturnType<typeof setInterval> | null = null;
 
@@ -50,7 +50,7 @@ export class DecisionLoopService extends Service {
   }
 
   static async start(runtime: IAgentRuntime) {
-    logger.info('[Dryad] Starting autonomous decision loop (every 6 hours)');
+    logger.info('[Dryad] Starting autonomous decision loop (every 24 hours)');
     const service = new DecisionLoopService(runtime);
 
     // Run first cycle after 30 seconds

@@ -765,7 +765,7 @@
                 <span class="hl">GPS:</span>
                 <span>42.3417° N, 83.1001° W // 25th St, Detroit</span>
                 <span class="hl">LOOP:</span>
-                <span>6h cycle // iNaturalist → detect → hire → verify → pay → record</span>
+                <span>24h cycle // iNaturalist → detect → hire → verify → pay → record</span>
             </div>
         </section>
 
@@ -1117,7 +1117,7 @@
 
     <div class="step"><span class="step-number">7</span><div class="step-content"><h3>Record Milestone Onchain</h3><p>DryadMilestones.sol records 5 types: SiteAssessment, InvasiveRemoval, SoilPrep, NativePlanting, Monitoring. Every action is permanently verifiable on <a href="https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22" target="_blank">BaseScan</a>.</p></div></div>
 
-    <div class="callout">The monitoring loop runs every 6 hours. Contractor work is seasonal — 1–2 jobs/year during establishment, tapering to once/year as native prairie matures. Between cycles, the agent auto-buys <a href="https://venice.ai/lp/diem" target="_blank">DIEM</a> to sustain inference and budgets for annual property taxes.</div>
+    <div class="callout">The monitoring loop runs every 24 hours. Contractor work is seasonal — 1–2 jobs/year during establishment, tapering to once/year as native prairie matures. Between cycles, the agent auto-buys <a href="https://venice.ai/lp/diem" target="_blank">DIEM</a> to sustain inference and budgets for annual property taxes.</div>
 </div>
 </section>
 
@@ -1524,7 +1524,7 @@ Would you be able to review the species list and planting density for this site?
         <div>
             <p>Built by <strong>Nick George</strong></p>
             <p><a href="https://www.canr.msu.edu/conservation_stewards/" target="_blank">Michigan Conservation Steward</a></p>
-            <p style="margin-top:8px"><a href="mailto:powahgen@gmail.com">powahgen@gmail.com</a></p>
+            <p style="margin-top:8px"><a href="https://x.com/0xnock" target="_blank">@0xnock</a></p>
         </div>
         <div style="text-align:right">
             <p><a href="https://github.com/vivicool12334/dryad" target="_blank">GitHub</a> &bull; <a href="mailto:dryad@agentmail.to">dryad@agentmail.to</a></p>
@@ -1655,26 +1655,43 @@ function match(input){
   return best&&bestS>0?best.r:"I can help with:\n• The Dryad project\n• Detroit vacant land & DLBA process\n• Native plants & ecology\n• Invasive species\n• Blockchain & governance\n• How to get involved\n\nTry asking about one of these!";
 }
 
+function renderChat(text){
+  // Sanitize HTML first
+  var tmp=document.createElement('div');tmp.textContent=text;var safe=tmp.innerHTML;
+  // Bold: **text**
+  safe=safe.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  // Italic: *text*
+  safe=safe.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  // Bare URLs → clickable links
+  safe=safe.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">$1</a>');
+  // Newlines
+  safe=safe.replace(/\n/g,'<br>');
+  return safe;
+}
 function addMsg(role,text,isTyping){
   var el=document.getElementById('chat-messages');
   var d=document.createElement('div');
   d.className='chat-msg '+role+(isTyping?' typing':'');
-  d.textContent=text;
+  if(isTyping||role==='user'){d.textContent=text;}else{d.innerHTML=renderChat(text);}
   el.appendChild(d);
   el.scrollTop=el.scrollHeight;
   return d;
 }
 
 var AGENT_API='/api/chat', useKB=false;
+var chatHistory=[];
 async function send(text){
   var w=document.getElementById('chat-welcome');if(w)w.remove();
   addMsg('user',text);
+  chatHistory.push({role:'user',content:text});
+  // Keep last 10 exchanges (20 messages) to stay within token limits
+  if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
   sugIdx=(sugIdx+4)%allSuggestions.length;showSuggestions();
   var typing=addMsg('agent','...',true);
   var resp;
   if(!useKB){
     try{
-      var r=await fetch(AGENT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text}),signal:AbortSignal.timeout(15000)});
+      var r=await fetch(AGENT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,history:chatHistory.slice(0,-1)}),signal:AbortSignal.timeout(15000)});
       if(!r.ok)throw 0;
       var data=await r.json();
       resp=data.text;
@@ -1684,7 +1701,10 @@ async function send(text){
     await new Promise(function(r){setTimeout(r, Math.min(800 + resp.length * 3, 2500));});
   }
   typing.remove();
-  addMsg('agent',resp||match(text));
+  resp=resp||match(text);
+  addMsg('agent',resp);
+  chatHistory.push({role:'assistant',content:resp});
+  if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
 }
 
 function init(){
