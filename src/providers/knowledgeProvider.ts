@@ -26,7 +26,7 @@ const knowledgeProvider: Provider = {
       if (filename === 'ecology' && /invasive|native|species|plant|tree|oak|prairie|restoration|ecosystem|canopy|seed|sapling|knotweed|buckthorn|ailanthus|phragmites|milkweed/.test(messageText)) {
         relevantKnowledge.push(content);
       }
-      if (filename === 'detroit' && /detroit|vacant|lot|dlba|land bank|neighborhood|chadsey|community|tax|conservancy|equity|mow/.test(messageText)) {
+      if (filename === 'detroit' && /detroit|vacant|lot|dlba|land bank|neighborhood|chadsey|community|tax|conservancy|equity|mow|heat island|temperature|canopy/.test(messageText)) {
         relevantKnowledge.push(content);
       }
       if (filename === 'operations' && /treasury|wallet|contract|milestone|payment|decision|loop|how|work|steth|diem|uniswap|email|submit/.test(messageText)) {
@@ -36,6 +36,12 @@ const knowledgeProvider: Provider = {
         relevantKnowledge.push(content);
       }
       if (filename === 'learned' && /learn|discover|new|recent|observe|found|spotted|species/.test(messageText)) {
+        relevantKnowledge.push(content);
+      }
+      if (filename === 'greenspaces' && /green\s?space|health|mental|crime|property value|stormwater|carbon|air quality|heat|cool|pollinator|biodiversity|corridor|benefit|impact|why|matter|important|equity|justice/.test(messageText)) {
+        relevantKnowledge.push(content);
+      }
+      if (filename === 'invasives-research' && /invasive|ailanthus|tree of heaven|lanternfly|slf|knotweed|cascade|cost|billion|management|edrr|early detection|agriculture|grape/.test(messageText)) {
         relevantKnowledge.push(content);
       }
     }
