@@ -152,41 +152,30 @@ export async function postThread(tweets: string[]): Promise<string[]> {
 }
 
 /**
- * Generate a loop summary tweet from decision loop results.
+ * Get the next tweet from the queue and advance the index.
+ * Returns null if queue is exhausted.
  */
-export function formatLoopTweet(data: {
-  healthScore?: number;
-  observations?: number;
-  nativeCount?: number;
-  invasiveCount?: number;
-  actionsTriggered?: string[];
-  spendingMode?: string;
-  season?: string;
-}): string {
-  const parts: string[] = [];
+export function getNextQueuedTweet(): string | null {
+  const fs = require('fs');
+  const path = require('path');
+  const queuePath = path.join(process.cwd(), 'data', 'tweet-queue.json');
 
-  if (data.season) parts.push(`🌿 ${data.season}`);
+  try {
+    const raw = fs.readFileSync(queuePath, 'utf-8');
+    const queue = JSON.parse(raw);
 
-  parts.push('24hr loop complete.');
+    if (queue.nextIndex >= queue.tweets.length) {
+      logger.info('[Twitter] Tweet queue exhausted');
+      return null;
+    }
 
-  if (data.healthScore !== undefined) {
-    parts.push(`Health: ${data.healthScore}/100`);
+    const tweet = queue.tweets[queue.nextIndex];
+    queue.nextIndex += 1;
+    fs.writeFileSync(queuePath, JSON.stringify(queue, null, 2));
+    logger.info(`[Twitter] Dequeued tweet ${queue.nextIndex}/${queue.tweets.length}`);
+    return tweet;
+  } catch (error) {
+    logger.error({ error }, '[Twitter] Failed to read tweet queue');
+    return null;
   }
-
-  if (data.observations !== undefined) {
-    const native = data.nativeCount || 0;
-    const invasive = data.invasiveCount || 0;
-    parts.push(`${data.observations} observations (${native} native, ${invasive} invasive)`);
-  }
-
-  if (data.actionsTriggered && data.actionsTriggered.length > 0) {
-    parts.push(`Actions: ${data.actionsTriggered.join(', ')}`);
-  }
-
-  if (data.spendingMode) {
-    parts.push(`Treasury: ${data.spendingMode}`);
-  }
-
-  const tweet = parts.join(' | ');
-  return tweet.length > 280 ? tweet.slice(0, 277) + '...' : tweet;
 }
