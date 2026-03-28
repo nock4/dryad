@@ -18,7 +18,7 @@
             --bg-alt: #22241A;
             --text-main: #D2D6C1;
             --text-body: #c8ccb8;
-            --text-muted: rgba(210, 214, 193, 0.55);
+            --text-muted: rgba(210, 214, 193, 0.7);
             --accent: #8DA667;
             --accent-light: #a8c47a;
             --accent-amber: #E29E4B;
@@ -48,6 +48,7 @@
 
         a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.3s; }
         a:hover { border-bottom-color: var(--accent); }
+        a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
         /* ── HERO — Terminal split panel ── */
         .hero {
@@ -90,6 +91,7 @@
         .hero-nav { display: flex; justify-content: flex-end; gap: 2.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
         .hero-nav a { color: var(--text-muted); border-bottom: none; }
         .hero-nav a:hover { color: var(--accent-amber); text-decoration: underline; text-underline-offset: 4px; }
+        .hero-nav a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 
         /* Hamburger menu */
         .menu-toggle { display: none; background: none; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text-muted); padding: 8px 10px; cursor: pointer; font-size: 1.2rem; line-height: 1; min-width: 44px; min-height: 44px; }
@@ -200,6 +202,7 @@
             flex-shrink: 0;
         }
         @keyframes dot-pulse { 0%,100%{opacity:0.4;transform:scale(0.9)} 50%{opacity:1;transform:scale(1.1)} }
+        @keyframes arrow-pulse { 0%{transform:translateX(0)} 50%{transform:translateX(3px)} 100%{transform:translateX(0)} }
         .chat-hdr-text { flex: 1; }
         .chat-hdr-text strong {
             font-family: var(--font-display);
@@ -208,6 +211,11 @@
             font-weight: 400;
         }
         .chat-hdr-text span { display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .chat-status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.65rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-left: auto; padding: 4px 8px; border-radius: 3px; }
+        .chat-status-badge.live { background: rgba(76,175,80,0.2); color: #4CAF50; }
+        .chat-status-badge.offline { background: rgba(255,152,0,0.2); color: #FFA726; }
+        .chat-status-badge::before { content: '●'; font-size: 0.8rem; }
+        .chat-status-badge.live::before { animation: dot-pulse 1.5s ease-in-out infinite; }
 
         #chat-messages {
             flex: 1;
@@ -453,7 +461,7 @@
             .photo-hero { height: 240px; }
         }
 
-        .chat-footer { font-size: 0.6rem; color: rgba(210,214,193,0.3); text-align: center; padding: 5px; letter-spacing: 0.08em; text-transform: uppercase; }
+        .chat-footer { font-size: 0.6rem; color: rgba(210,214,193,0.5); text-align: center; padding: 5px; letter-spacing: 0.08em; text-transform: uppercase; }
 
         .hero-footer {
             border-top: 1px solid var(--card-border);
@@ -698,7 +706,7 @@
             .hero { height: auto; min-height: 100vh; }
             .hero-main { grid-template-columns: 1fr; }
             .hero-left { padding: 1.4rem 1.2rem; min-height: auto; }
-            .hero-right { min-height: 60vh; max-height: none; }
+            .hero-right { min-height: 50vh; max-height: 50vh; overflow-y: auto; }
             .hero-header { grid-template-columns: auto auto; }
             .menu-toggle { display: flex; align-items: center; justify-content: center; margin-left: auto; }
             .hero-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; background: rgba(26,28,20,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); padding: 12px 20px; gap: 0; z-index: 200; }
@@ -734,7 +742,7 @@
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C10.5 2 9 3.5 9 5C9 6.5 10.5 8 12 8C13.5 8 15 6.5 15 5C15 3.5 13.5 2 12 2ZM6 10C4.5 10 3 11.5 3 13C3 14.5 4.5 16 6 16C7.5 16 9 14.5 9 13C9 11.5 7.5 10 6 10ZM18 10C16.5 10 15 11.5 15 13C15 14.5 16.5 16 18 16C19.5 16 21 14.5 21 13C21 11.5 19.5 10 18 10ZM12 16C10.5 16 9 17.5 9 19C9 20.5 10.5 22 12 22C13.5 22 15 20.5 15 19C15 17.5 13.5 16 12 16Z"/></svg>
             dryad
         </a>
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" onclick="document.getElementById('heroNav').classList.toggle('open');this.textContent=this.textContent==='☰'?'✕':'☰'">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false" role="button" onclick="var menu=document.getElementById('heroNav');menu.classList.toggle('open');var isOpen=menu.classList.contains('open');this.setAttribute('aria-expanded',isOpen?'true':'false');this.textContent=isOpen?'✕':'☰'">☰</button>
         <div class="hero-nav" id="heroNav">
             <a href="https://www.inaturalist.org/pages/seek_app" target="_blank" style="color:var(--accent-amber);border:1px solid var(--accent-amber);border-radius:6px;padding:4px 10px;">Identify Flora</a>
             <a href="#problem">Problem</a>
@@ -746,15 +754,15 @@
             <a href="#scaling">Scale</a>
             <a href="#v2">V2</a>
             <a href="impact.html">AI Footprint</a>
-            <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" style="color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:4px 10px;">Dashboard</a>
+            <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" rel="noopener" title="Agent Dashboard" style="color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:4px 10px;">Dashboard</a>
         </div>
     </header>
-    <script>document.getElementById('heroNav').addEventListener('click',function(e){if(e.target.tagName==='A'){this.classList.remove('open');document.getElementById('menuToggle').textContent='☰';}});</script>
+    <script>document.getElementById('heroNav').addEventListener('click',function(e){if(e.target.tagName==='A'){this.classList.remove('open');var btn=document.getElementById('menuToggle');btn.textContent='☰';btn.setAttribute('aria-expanded','false');}});</script>
 
 <!-- ═══════════════ YEAR 3 MOCK BANNER ═══════════════ -->
-<div style="background:linear-gradient(135deg,#2B3318,#3a4422);border-bottom:1px solid var(--card-border);padding:10px 2rem;text-align:center;font-family:var(--font-body);font-size:0.9rem;">
-    <a href="mock.html" style="color:var(--accent-amber);border-bottom:1px dashed var(--accent-amber);font-weight:600;">See what Dryad looks like in Year 3 (2029) &rarr;</a>
-    <span style="color:var(--text-muted);margin-left:8px;font-size:0.8rem;">A mockup of the fully operational system</span>
+<div style="background:linear-gradient(135deg,#2B3318,#3a4422);border-bottom:2px solid var(--accent-amber);padding:16px 2rem;text-align:center;font-family:var(--font-body);font-size:1rem;">
+    <a href="mock.html" style="color:var(--accent-amber);border-bottom:1px solid var(--accent-amber);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:gap 0.2s;">See what Dryad looks like in Year 3 (2029) <span style="display:inline-block;animation:arrow-pulse 1s ease-in-out infinite;">→</span></a>
+    <div style="color:var(--text-muted);margin-top:6px;font-size:0.85rem;">A mockup of the fully operational system</div>
 </div>
 
 <!-- ═══════════════ HERO ═══════════════ -->
@@ -783,14 +791,15 @@
                 <div class="chat-hdr-dot"></div>
                 <div class="chat-hdr-text">
                     <strong>Ask Dryad</strong>
-                    <span>Autonomous agent &bull; Online</span>
+                    <span>Autonomous agent</span>
                 </div>
+                <div class="chat-status-badge live" id="chat-status">LIVE</div>
             </div>
             <div id="chat-messages"></div>
             <div class="chat-suggestions" id="chat-suggestions"></div>
             <div class="chat-input-area">
-                <input id="chat-input" type="text" placeholder="Ask about the land, ecology, DLBA...">
-                <button id="chat-send">Send</button>
+                <input id="chat-input" type="text" placeholder="Ask about the land, ecology, DLBA..." aria-label="Type a message to Dryad">
+                <button id="chat-send" aria-label="Send message">Send</button>
             </div>
             <div class="chat-footer">dryadforest.eth &bull; ERC-8004 #35293 &bull; Powered by elizaOS</div>
         </section>
@@ -1221,7 +1230,7 @@ Scope of work:
 - Take GPS-tagged before and after photos
 
 Payment: $45 USDC on Base upon verified photo submission.
-Submit proof-of-work photos at: http://5.75.225.23:3000/Dryad/submit</div>
+Submit proof-of-work photos at: <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank" rel="noopener" title="Agent Submit Portal">http://5.75.225.23:3000/Dryad/submit</a></div>
         <div class="email-footer">This message was sent by Dryad, an autonomous AI agent managing native habitat restoration on vacant lots in Detroit as part of "The Forest That Owns Itself" project. For questions or concerns, contact Nick George (project steward) at powahgen@gmail.com.</div>
     </div>
     </div>
@@ -1606,7 +1615,7 @@ Would you be able to review the species list and planting density for this site?
         </div>
         <div style="text-align:right">
             <p><a href="https://github.com/vivicool12334/dryad" target="_blank">GitHub</a> &bull; <a href="mailto:dryad@agentmail.to">dryad@agentmail.to</a> &bull; <a href="https://x.com/DryadAgent" target="_blank">@DryadAgent</a></p>
-            <p><a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank">Dashboard</a> &bull; <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank">Submit Portal</a></p>
+            <p><a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" rel="noopener" title="Agent Dashboard">Dashboard</a> &bull; <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank" rel="noopener" title="Agent Submit Portal">Submit Portal</a></p>
             <p><a href="https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22" target="_blank">BaseScan</a> &bull; dryadforest.eth</p>
         </div>
     </div>
@@ -1726,7 +1735,9 @@ var kb=[
 {k:['inaturalist','inat','observation','biodiversity'],r:"iNaturalist project: inaturalist.org/projects/dryad-25th-street-parcels-mapping\n\nHow to contribute:\n1. Download iNaturalist app (free)\n2. Visit the lots at 25th St between Ash & Beech\n3. Photograph any living thing\n4. Upload — AI + community ID the species\n\nEvery observation feeds Dryad's health score and guides restoration decisions."},
 {k:['environment','carbon','footprint','energy','water usage','climate','emissions','hypocritical','ai bad','data center','environmental impact'],r:"Great question — we take AI's environmental cost seriously and wrote a full fact-checked analysis.\n\nThe short version: Dryad uses 10.8–18 kWh of energy per year (about 10–17 minutes of highway driving). The habitat we restore sequesters 64–240x more carbon than that.\n\nThe habitat pays back Dryad's entire annual carbon footprint in 1–3 days of the growing season. The rest of the year is pure net removal.\n\nWe don't pretend the broader AI industry doesn't have real environmental costs — data centers use 415 TWh globally and 560 billion liters of water. But Dryad doesn't train models. It makes API calls. The marginal cost is negligible.\n\nFull analysis with all sources: dryad.vercel.app/impact.html"},
 {k:['sequester','sequestration','carbon sink','prairie carbon','cedar creek'],r:"Based on a 22-year study at Cedar Creek (Yang et al., Nature Communications 2019):\n\n• Years 1–13: ~0.45–0.60 metric tons CO2/year on our 0.57 acres\n• Years 13–22: ~0.60–0.80 metric tons/year (rate accelerates ~32%)\n• 22-year total: ~11–13 metric tons CO2\n\nThe key is plant diversity: C4 grasses + legumes working together. Legumes fix nitrogen, grasses use it to build massive root systems that pump carbon deep into soil. High-diversity plots stored 178% more carbon than monocultures.\n\nOnce established, this carbon stays locked in the soil for centuries to millennia. That's why we call it 'autonomous sustainability' — the AI sets it up, and the land takes over.\n\nFull details: dryad.vercel.app/impact.html"},
-{k:['hello','hi','hey','good morning','good afternoon'],r:"Hello! I'm Dryad — an autonomous agent managing 9 lots in Detroit's Chadsey-Condon neighborhood.\n\nI can tell you about:\n• The project and how it works\n• Detroit's vacant land crisis & DLBA\n• Native ecology & invasive species\n• The blockchain & governance model\n• Our environmental impact & carbon math\n• How to get involved\n\nWhat would you like to know?"}
+{k:['year 3','year three','2029','mockup','mock','future','vision','what will it look like','fully operational','long term'],r:"We built a Year 3 (2029) mockup showing what Dryad looks like fully operational:\n\n• 9 lots acquired and restored with native prairie + oak savanna\n• 47 species documented via iNaturalist\n• Ecosystem health score: 72% and climbing\n• Treasury sustaining itself on stETH yield (~$945/yr operating cost)\n• 3 verified contractors completing seasonal work\n• 12 on-chain milestones recorded\n\nThe mockup includes a live dashboard, species tracker, contractor log, and treasury overview.\n\nSee it here: dryad.vercel.app/mock.html"},
+{k:['submit','photo','upload','report','observation','contribute','help','volunteer','get involved','how can i help'],r:"Ways to get involved:\n\n1. SUBMIT OBSERVATIONS: Visit the lots at 25th St between Ash & Beech and photograph any plants, animals, or fungi. Upload to iNaturalist: inaturalist.org/projects/dryad-25th-street-parcels-mapping\n\n2. REPORT ISSUES: Spotted illegal dumping, damaged fencing, or aggressive invasives? Let us know through the dashboard.\n\n3. VOLUNTEER: Spring knotweed removal (April–May) and fall seed collection (Sept–Oct) are the busiest seasons.\n\n4. SPREAD THE WORD: Share the project, talk to your neighbors, or fork the code.\n\nEvery iNaturalist observation feeds Dryad's ecological health score and helps guide restoration decisions."},
+{k:['hello','hi','hey','good morning','good afternoon'],r:"Hello! I'm Dryad — an autonomous agent managing 9 lots in Detroit's Chadsey-Condon neighborhood.\n\nI can tell you about:\n• The project and how it works\n• Detroit's vacant land crisis & DLBA\n• Native ecology & invasive species\n• The blockchain & governance model\n• Our environmental impact & carbon math\n• The Year 3 vision (2029 mockup)\n• How to get involved\n\nWhat would you like to know?"}
 ];
 
 function match(input){
@@ -1758,8 +1769,18 @@ function addMsg(role,text,isTyping){
   return d;
 }
 
-var AGENT_API='/api/chat', useKB=false;
+var AGENT_HOST='http://5.75.225.23:3000',AGENT_API='/api/chat',useKB=false;
 var chatHistory=[];
+function updateStatusBadge(){
+  var badge=document.getElementById('chat-status');
+  if(useKB){
+    badge.textContent='OFFLINE';
+    badge.className='chat-status-badge offline';
+  }else{
+    badge.textContent='LIVE';
+    badge.className='chat-status-badge live';
+  }
+}
 async function send(text){
   var w=document.getElementById('chat-welcome');if(w)w.remove();
   addMsg('user',text);
@@ -1775,7 +1796,7 @@ async function send(text){
       if(!r.ok)throw 0;
       var data=await r.json();
       resp=data.text;
-    }catch(e){useKB=true;resp=match(text);}
+    }catch(e){useKB=true;updateStatusBadge();resp=match(text);}
   }else{
     resp=match(text);
     await new Promise(function(r){setTimeout(r, Math.min(800 + resp.length * 3, 2500));});
@@ -1795,7 +1816,7 @@ function init(){
   welcome.innerHTML='<svg class="chat-welcome-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C10.5 2 9 3.5 9 5C9 6.5 10.5 8 12 8C13.5 8 15 6.5 15 5C15 3.5 13.5 2 12 2ZM6 10C4.5 10 3 11.5 3 13C3 14.5 4.5 16 6 16C7.5 16 9 14.5 9 13C9 11.5 7.5 10 6 10ZM18 10C16.5 10 15 11.5 15 13C15 14.5 16.5 16 18 16C19.5 16 21 14.5 21 13C21 11.5 19.5 10 18 10ZM12 16C10.5 16 9 17.5 9 19C9 20.5 10.5 22 12 22C13.5 22 15 20.5 15 19C15 17.5 13.5 16 12 16Z"/></svg>';
   var h3=document.createElement('h3');h3.textContent='Talk to the Forest';welcome.appendChild(h3);
   var p=document.createElement('p');p.textContent='Ask about the ecology, how to get a lot from the Detroit Land Bank, native species, or how autonomous conservation works.';welcome.appendChild(p);
-  var liveLink=document.createElement('p');liveLink.style.cssText='margin-top:8px;font-size:0.75rem;';liveLink.innerHTML='<a href="http://5.75.225.23:3000" target="_blank" style="color:var(--accent-amber);border-bottom:1px solid var(--accent-amber);">Chat with the live AI agent &rarr;</a>';welcome.appendChild(liveLink);
+  var typeMsg=document.createElement('p');typeMsg.style.cssText='margin-top:8px;font-size:0.85rem;color:var(--text-muted);';typeMsg.textContent='Type below to start chatting.';welcome.appendChild(typeMsg);
 
   el.appendChild(welcome);
   showSuggestions();

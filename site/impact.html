@@ -17,7 +17,7 @@
             --bg-alt: #22241A;
             --text-main: #D2D6C1;
             --text-body: #c8ccb8;
-            --text-muted: rgba(210, 214, 193, 0.55);
+            --text-muted: rgba(210, 214, 193, 0.7);
             --accent: #8DA667;
             --accent-light: #a8c47a;
             --accent-amber: #E29E4B;
@@ -36,7 +36,7 @@
         body {
             background-color: var(--bg);
             color: var(--text-body);
-            font-family: var(--font-mono);
+            font-family: var(--font-body);
             font-size: 0.9rem;
             letter-spacing: 0.02em;
             width: 100%;
@@ -47,6 +47,7 @@
 
         a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.3s; }
         a:hover { border-bottom-color: var(--accent); }
+        a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
         .hero-header {
             display: grid;
@@ -79,7 +80,7 @@
         .hero-nav { display: flex; justify-content: flex-end; gap: 2.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
         .hero-nav a { color: var(--text-muted); border-bottom: none; }
         .hero-nav a:hover { color: var(--accent-amber); text-decoration: underline; text-underline-offset: 4px; }
-        .hero-nav a.active { color: var(--accent-amber); }
+        .hero-nav a.active, header a.active { color: var(--accent-amber); border-bottom: 2px solid var(--accent-amber); }
 
         .menu-toggle { display: none; background: none; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text-muted); padding: 8px 10px; cursor: pointer; font-size: 1.2rem; line-height: 1; min-width: 44px; min-height: 44px; }
         .menu-toggle:hover { color: var(--accent-amber); border-color: var(--accent); }
@@ -295,8 +296,8 @@
         <a href="index.html#problem">Problem</a>
         <a href="index.html#parcels">The Land</a>
         <a href="index.html#how">How It Works</a>
-        <a href="impact.html" class="active">Env. Impact</a>
-        <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" style="color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:4px 10px;">Dashboard</a>
+        <a href="impact.html" class="active">AI Footprint</a>
+        <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" rel="noopener" style="color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:4px 10px;">Dashboard</a>
     </div>
 </header>
 
@@ -314,6 +315,7 @@
     <h2>The Headline Number</h2>
     <p>Each lot Dryad puts on the path to autonomous native habitat permanently removes CO2 from the atmosphere - and the rate accelerates over time.</p>
 
+    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
     <table>
         <tr><th>Timeframe</th><th>CO2 Sequestered (0.57 acres)</th><th>What's Happening</th></tr>
         <tr><td><strong>Years 1-13</strong></td><td>~0.45-0.60 metric tons/year</td><td>Root systems establishing, soil biology developing</td></tr>
@@ -321,6 +323,7 @@
         <tr><td><strong>22-year total</strong></td><td>~11-13 metric tons</td><td>Deep roots lock carbon into soil for centuries to millennia</td></tr>
         <tr><td><strong>Dryad's annual compute</strong></td><td>0.004-0.007 metric tons</td><td>64-240x less than what the habitat sequesters each year</td></tr>
     </table>
+    </div>
 
     <div class="callout">
         <p style="max-width:100%;margin-bottom:0"><strong style="color:var(--accent-amber)">The habitat pays back Dryad's entire annual carbon footprint in 1-3 days of the growing season.</strong> The rest of the year is net removal.</p>
@@ -413,6 +416,7 @@
     <h2>Part 4: The Environmental Benefits Dwarf the Cost</h2>
     <p>Here's what 0.57 acres of native pollinator habitat actually produces:</p>
 
+    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
     <table>
         <tr><th>Benefit</th><th>Annual Impact</th><th>Source</th></tr>
         <tr><td><strong>Carbon sequestration</strong></td><td>0.57-0.97 metric tons CO2/year</td><td><a href="https://www.nature.com/articles/s41467-019-08636-w" target="_blank">Nature Communications 2019</a>; <a href="https://www.nature.com/articles/s41598-024-57789-2" target="_blank">Scientific Reports 2024</a></td></tr>
@@ -422,6 +426,7 @@
         <tr><td><strong>Biodiversity increase</strong></td><td>10-20x species diversity vs. abandoned lot</td><td>NOAA; Detroit Audubon</td></tr>
         <tr><td><strong>PM2.5 air pollution removed</strong></td><td>15-50 lbs/year</td><td><a href="https://research.fs.usda.gov/treesearch/43676" target="_blank">USDA Forest Service 2022</a></td></tr>
     </table>
+    </div>
 
     <div class="callout">
         <p style="max-width:100%;margin-bottom:0"><strong style="color:var(--accent)">The net carbon math:</strong> Dryad sequesters <strong style="color:var(--accent-amber)">64-240x</strong> more carbon than it produces, and that ratio improves every year as the habitat matures.</p>
@@ -540,6 +545,14 @@
 </div>
 </section>
 
+<!-- ═══════════════ CTA ═══════════════ -->
+<div style="text-align:center; padding: 48px 24px; border-top: 1px solid var(--card-border);">
+    <h3 style="font-family: var(--font-display); font-size: 1.8rem; color: var(--text-main); margin-bottom: 12px;">Ready to see it in action?</h3>
+    <p style="color: var(--text-muted); margin-bottom: 24px;">Explore the live dashboard or chat with the Dryad agent to learn more.</p>
+    <a href="index.html" style="display:inline-block; background:var(--accent); color:var(--bg); padding:12px 28px; border-radius:6px; font-weight:600; margin: 0 8px; border:none; text-decoration: none;">← Back to Main Site</a>
+    <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" rel="noopener" style="display:inline-block; background:transparent; color:var(--accent); padding:12px 28px; border-radius:6px; font-weight:600; border:1px solid var(--accent); margin: 0 8px; text-decoration: none;">View Dashboard →</a>
+</div>
+
 <!-- ═══════════════ FOOTER ═══════════════ -->
 <div class="page-footer">
 <div class="content">
@@ -550,9 +563,9 @@
             <p style="margin-top:8px"><a href="https://x.com/0xnock" target="_blank">@0xnock</a></p>
         </div>
         <div style="text-align:right">
-            <p><a href="https://github.com/vivicool12334/dryad" target="_blank">GitHub</a> &bull; <a href="mailto:dryad@agentmail.to">dryad@agentmail.to</a> &bull; <a href="https://x.com/DryadAgent" target="_blank">@DryadAgent</a></p>
-            <p><a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank">Dashboard</a> &bull; <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank">Submit Portal</a></p>
-            <p><a href="https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22" target="_blank">BaseScan</a> &bull; dryadforest.eth</p>
+            <p><a href="https://github.com/vivicool12334/dryad" target="_blank" rel="noopener">GitHub</a> &bull; <a href="mailto:dryad@agentmail.to">dryad@agentmail.to</a> &bull; <a href="https://x.com/DryadAgent" target="_blank" rel="noopener">@DryadAgent</a></p>
+            <p><a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" rel="noopener">Dashboard</a> &bull; <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank" rel="noopener">Submit Portal</a></p>
+            <p><a href="https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22" target="_blank" rel="noopener">BaseScan</a> &bull; dryadforest.eth</p>
         </div>
     </div>
 </div>
