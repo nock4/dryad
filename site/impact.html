@@ -1,0 +1,562 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Impact — Dryad</title>
+    <meta name="description" content="Dryad's honest assessment of AI's environmental footprint and how native habitat restoration offsets it 64–240x over.">
+    <meta property="og:title" content="Environmental Impact — Dryad">
+    <meta property="og:description" content="Each lot Dryad restores sequesters 64–240x more carbon than the AI uses. Here's the data.">
+    <meta property="og:image" content="images/lots/street-view-main.jpg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1A1C14;
+            --bg-alt: #22241A;
+            --text-main: #D2D6C1;
+            --text-body: #c8ccb8;
+            --text-muted: rgba(210, 214, 193, 0.55);
+            --accent: #8DA667;
+            --accent-light: #a8c47a;
+            --accent-amber: #E29E4B;
+            --card-bg: #22241A;
+            --card-border: rgba(141, 166, 103, 0.2);
+            --danger: #c44;
+            --space-unit: max(2vw, 20px);
+            --font-display: 'Instrument Serif', serif;
+            --font-mono: 'Space Mono', monospace;
+            --font-body: 'Manrope', system-ui, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-body);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            width: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection { background: var(--accent-amber); color: var(--bg); }
+
+        a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.3s; }
+        a:hover { border-bottom-color: var(--accent); }
+
+        .hero-header {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            align-items: center;
+            padding: 0.9rem 2rem;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(26,28,20,0.97);
+            backdrop-filter: blur(12px);
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            text-transform: lowercase;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
+            color: var(--accent);
+        }
+        .logo-area:hover { border-bottom: none !important; color: var(--accent-light); }
+        .logo-area svg { width: 22px; height: 22px; fill: var(--accent-amber); animation: logo-spin 30s linear infinite; }
+        @keyframes logo-spin { to { transform: rotate(360deg); } }
+
+        .hero-nav { display: flex; justify-content: flex-end; gap: 2.5rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .hero-nav a { color: var(--text-muted); border-bottom: none; }
+        .hero-nav a:hover { color: var(--accent-amber); text-decoration: underline; text-underline-offset: 4px; }
+        .hero-nav a.active { color: var(--accent-amber); }
+
+        .menu-toggle { display: none; background: none; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text-muted); padding: 8px 10px; cursor: pointer; font-size: 1.2rem; line-height: 1; min-width: 44px; min-height: 44px; }
+        .menu-toggle:hover { color: var(--accent-amber); border-color: var(--accent); }
+
+        .content { max-width: 960px; margin: 0 auto; padding: 0 32px; }
+
+        section {
+            padding: 72px 0 80px;
+            border-bottom: 1px solid var(--card-border);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            letter-spacing: 0;
+        }
+
+        section h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 3.5vw, 3.5rem);
+            font-weight: 400;
+            color: var(--accent-amber);
+            margin-bottom: 12px;
+            line-height: 1.1;
+            text-transform: none;
+            letter-spacing: -0.02em;
+        }
+
+        section h2 + p, section h2 + div { margin-top: 20px; }
+
+        section h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            text-transform: none;
+        }
+
+        section p {
+            line-height: 1.75;
+            margin-bottom: 16px;
+            max-width: 680px;
+            color: var(--text-body);
+        }
+
+        .wide p { max-width: 100%; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: rgba(141,166,103,0.4); }
+
+        .card-accent {
+            background: rgba(141,166,103,0.15);
+            color: var(--text-main);
+            border-color: var(--accent);
+        }
+        .card-accent a { color: var(--accent-amber); }
+
+        .stat-big {
+            font-family: var(--font-display);
+            font-size: 2.8rem;
+            font-weight: 400;
+            color: var(--accent-amber);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+        }
+        th, td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+        th {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-family: var(--font-mono);
+        }
+        tr:last-child td { border-bottom: none; }
+
+        .callout {
+            background: rgba(141,166,103,0.1);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 28px 32px;
+            margin: 32px 0;
+        }
+        .callout p { max-width: 100%; }
+
+        .question-block {
+            background: rgba(226,158,75,0.08);
+            border-left: 3px solid var(--accent-amber);
+            padding: 24px 28px;
+            margin: 32px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .question-block p {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--accent-amber);
+            font-style: italic;
+            max-width: 100%;
+            margin-bottom: 8px;
+        }
+        .question-block .answer { font-family: var(--font-body); font-size: 0.95rem; color: var(--text-body); }
+
+        .source-link { font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; }
+        .source-link a { color: var(--accent); font-size: 0.8rem; }
+
+        .page-hero {
+            padding: 100px 0 60px;
+            border-bottom: 1px solid var(--card-border);
+            text-align: center;
+        }
+        .page-hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.8rem, 5vw, 5rem);
+            font-weight: 400;
+            color: var(--accent-amber);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        .page-hero .subtitle {
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .numbered-item {
+            margin-bottom: 28px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid rgba(141,166,103,0.1);
+        }
+        .numbered-item:last-child { border-bottom: none; }
+        .numbered-item strong { color: var(--text-main); }
+
+        .bottom-line {
+            background: linear-gradient(135deg, rgba(141,166,103,0.12), rgba(226,158,75,0.08));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        .bottom-line h2 { text-align: center; }
+        .bottom-line p { max-width: 700px; margin: 12px auto 0; text-align: center; font-size: 1.05rem; line-height: 1.7; }
+
+        .sources-section { font-size: 0.82rem; color: var(--text-muted); }
+        .sources-section h3 { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin: 24px 0 8px; }
+        .sources-section ul { list-style: none; padding: 0; }
+        .sources-section li { margin-bottom: 6px; line-height: 1.5; }
+        .sources-section a { color: var(--accent); font-size: 0.82rem; }
+
+        .page-footer {
+            background: #14150F;
+            color: var(--text-muted);
+            padding: 60px 0;
+            border-top: 1px solid var(--card-border);
+        }
+        .page-footer a { color: var(--accent); border-bottom-color: transparent; }
+        .page-footer a:hover { border-bottom-color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .hero-header { grid-template-columns: auto auto; }
+            .menu-toggle { display: flex; align-items: center; justify-content: center; margin-left: auto; }
+            .hero-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; background: rgba(26,28,20,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); padding: 12px 20px; gap: 0; z-index: 200; }
+            .hero-nav.open { display: flex; }
+            .hero-nav a { padding: 14px 8px; border-bottom: 1px solid var(--card-border); font-size: 0.9rem; min-height: 44px; display: flex; align-items: center; }
+            .hero-nav a:last-child { border-bottom: none; }
+            .content { padding: 0 16px; }
+            section { padding: 48px 0; }
+            .page-hero { padding: 72px 0 40px; }
+            .page-hero h1 { font-size: 2.4rem; }
+            .bottom-line { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<header class="hero-header">
+    <a href="index.html" class="logo-area" style="text-decoration:none;border-bottom:none">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C10.5 2 9 3.5 9 5C9 6.5 10.5 8 12 8C13.5 8 15 6.5 15 5C15 3.5 13.5 2 12 2ZM6 10C4.5 10 3 11.5 3 13C3 14.5 4.5 16 6 16C7.5 16 9 14.5 9 13C9 11.5 7.5 10 6 10ZM18 10C16.5 10 15 11.5 15 13C15 14.5 16.5 16 18 16C19.5 16 21 14.5 21 13C21 11.5 19.5 10 18 10ZM12 16C10.5 16 9 17.5 9 19C9 20.5 10.5 22 12 22C13.5 22 15 20.5 15 19C15 17.5 13.5 16 12 16Z"/></svg>
+        dryad
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" onclick="document.getElementById('heroNav').classList.toggle('open');this.textContent=this.textContent==='☰'?'✕':'☰'">☰</button>
+    <div class="hero-nav" id="heroNav">
+        <a href="index.html">Home</a>
+        <a href="index.html#problem">Problem</a>
+        <a href="index.html#parcels">The Land</a>
+        <a href="index.html#how">How It Works</a>
+        <a href="impact.html" class="active">Env. Impact</a>
+        <a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank" style="color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:4px 10px;">Dashboard</a>
+    </div>
+</header>
+
+<!-- ═══════════════ PAGE HERO ═══════════════ -->
+<div class="page-hero">
+<div class="content">
+    <h1>Environmental Impact</h1>
+    <p class="subtitle">An honest, data-driven assessment of AI's environmental footprint - and how Dryad's native habitat restoration answers it.</p>
+</div>
+</div>
+
+<!-- ═══════════════ HEADLINE NUMBER ═══════════════ -->
+<section id="headline">
+<div class="content">
+    <h2>The Headline Number</h2>
+    <p>Each lot Dryad puts on the path to autonomous native habitat permanently removes CO2 from the atmosphere - and the rate accelerates over time.</p>
+
+    <table>
+        <tr><th>Timeframe</th><th>CO2 Sequestered (0.57 acres)</th><th>What's Happening</th></tr>
+        <tr><td><strong>Years 1-13</strong></td><td>~0.45-0.60 metric tons/year</td><td>Root systems establishing, soil biology developing</td></tr>
+        <tr><td><strong>Years 13-22</strong></td><td>~0.60-0.80 metric tons/year</td><td>Storage rate accelerates ~32% as biodiversity matures</td></tr>
+        <tr><td><strong>22-year total</strong></td><td>~11-13 metric tons</td><td>Deep roots lock carbon into soil for centuries to millennia</td></tr>
+        <tr><td><strong>Dryad's annual compute</strong></td><td>0.004-0.007 metric tons</td><td>64-240x less than what the habitat sequesters each year</td></tr>
+    </table>
+
+    <div class="callout">
+        <p style="max-width:100%;margin-bottom:0"><strong style="color:var(--accent-amber)">The habitat pays back Dryad's entire annual carbon footprint in 1-3 days of the growing season.</strong> The rest of the year is net removal.</p>
+    </div>
+
+    <p>This isn't a static number - it gets better. A 22-year study at <a href="https://cedarcreek.umn.edu/" target="_blank">Cedar Creek</a> (<a href="https://www.nature.com/articles/s41467-019-08636-w" target="_blank">Yang et al., <em>Nature Communications</em> 2019</a>) showed that diverse native prairie (16+ species) increased its carbon storage rate by roughly a third between the first and second decades. The key is plant diversity: C4 grasses + legumes working together, with legumes fixing nitrogen and grasses using it to build massive root systems that pump carbon deep into the soil. High-diversity plots stored 178% more carbon than monocultures.</p>
+
+    <p>Once established, this habitat is self-sustaining. That's the "autonomous sustainability" in Dryad's thesis - the AI coordinates the setup, and the land takes over from there.</p>
+
+    <p class="source-link">Sources: <a href="https://www.nature.com/articles/s41467-019-08636-w" target="_blank">Yang et al., Nature Communications 2019</a>; <a href="https://bwsr.state.mn.us/carbon-sequestration-grasslands" target="_blank">MN Board of Water and Soil Resources</a>; <a href="https://www.nature.com/articles/s41598-024-57789-2" target="_blank">Scientific Reports 2024</a></p>
+</div>
+</section>
+
+<!-- ═══════════════ THE QUESTION ═══════════════ -->
+<section id="question">
+<div class="content">
+    <div class="question-block">
+        <p>"But doesn't AI use massive amounts of energy and water? Isn't this hypocritical?"</p>
+        <div class="answer">This is a fair question. Here's our honest, data-driven answer.</div>
+    </div>
+</div>
+</section>
+
+<!-- ═══════════════ PART 1: AI COST ═══════════════ -->
+<section id="ai-cost">
+<div class="content wide">
+    <h2>Part 1: Yes, AI Has a Real Environmental Cost</h2>
+    <p style="max-width:100%">We're not going to pretend it doesn't. The industry-wide numbers are significant:</p>
+
+    <div class="grid-2" style="margin-top:24px">
+        <div class="card">
+            <h3>Energy</h3>
+            <p style="max-width:100%">Global data centers consumed <strong>415 TWh</strong> in 2024 (1.5% of world electricity). AI's share is growing fast - projected to hit 945 TWh by 2030, roughly 3% of global electricity. In the US, data centers already use 183 TWh (4.3% of US electricity) and <a href="https://www.pewresearch.org/short-reads/2025/10/24/what-we-know-about-energy-use-at-us-data-centers-amid-the-ai-boom/" target="_blank">could double by 2030</a>.</p>
+            <p class="source-link">Sources: <a href="https://www.iea.org/reports/energy-and-ai" target="_blank">IEA 2024</a>; <a href="https://www.pewresearch.org/short-reads/2025/10/24/what-we-know-about-energy-use-at-us-data-centers-amid-the-ai-boom/" target="_blank">Pew Research 2025</a></p>
+        </div>
+        <div class="card">
+            <h3>Water</h3>
+            <p style="max-width:100%">Data centers used an estimated <strong>560 billion liters</strong> of cooling water globally in 2024. <a href="https://sustainability.google/reports/google-2024-environmental-report/" target="_blank">Google alone consumed 6 billion gallons</a>. <a href="https://www.wri.org/insights/us-data-center-growth-impacts" target="_blank">Two-thirds of new data centers since 2022 are in water-stressed regions</a>.</p>
+            <p class="source-link">Sources: <a href="https://www.iea.org/reports/energy-and-ai" target="_blank">IEA 2024</a>; <a href="https://sustainability.google/reports/google-2024-environmental-report/" target="_blank">Google 2024 Environmental Report</a>; <a href="https://www.wri.org/insights/us-data-center-growth-impacts" target="_blank">WRI 2025</a></p>
+        </div>
+        <div class="card">
+            <h3>Energy Bills</h3>
+            <p style="max-width:100%">In Northern Virginia, wholesale electricity costs have <a href="https://www.bloomberg.com/graphics/2025-ai-data-centers-electricity-prices/" target="_blank">risen 267% over five years</a>. A <a href="https://www.cmu.edu/work-that-matters/energy-innovation/data-center-growth-could-increase-electricity-bills" target="_blank">Carnegie Mellon study</a> projects an <strong>8% average nationwide</strong> electricity bill increase by 2030, with up to <strong>25%</strong> in data center hotspots.</p>
+            <p class="source-link">Sources: <a href="https://www.bloomberg.com/graphics/2025-ai-data-centers-electricity-prices/" target="_blank">Bloomberg 2025</a>; <a href="https://www.cmu.edu/work-that-matters/energy-innovation/data-center-growth-could-increase-electricity-bills" target="_blank">Carnegie Mellon 2025</a>; <a href="https://www.brookings.edu/articles/the-future-of-data-centers/" target="_blank">Brookings 2025</a></p>
+        </div>
+        <div class="card">
+            <h3>Carbon</h3>
+            <p style="max-width:100%">Training GPT-4 required an estimated <strong>51-62 GWh</strong> of electricity and produced an estimated 1,000-15,000 tons of CO2. Natural gas plant proposals have <a href="https://globalenergymonitor.org/report/betting-big-on-data-centers-u-s-now-leads-world-for-new-gas-power-development/" target="_blank">tripled to power new data centers</a>.</p>
+            <p class="source-link">Sources: Towards Data Science estimates based on leaked data; <a href="https://globalenergymonitor.org/report/betting-big-on-data-centers-u-s-now-leads-world-for-new-gas-power-development/" target="_blank">Global Energy Monitor 2026</a></p>
+        </div>
+    </div>
+
+    <p style="margin-top:24px;max-width:100%"><strong style="color:var(--text-main)">These are real problems. We take them seriously.</strong></p>
+</div>
+</section>
+
+<!-- ═══════════════ PART 2: DRYAD'S FOOTPRINT ═══════════════ -->
+<section id="dryad-footprint">
+<div class="content">
+    <h2>Part 2: But Dryad's Footprint Is Vanishingly Small</h2>
+    <p>Dryad doesn't train models. It makes API calls to existing ones. The marginal cost of one more user on Claude or GPT-4 is negligible - the model and data center exist whether or not Dryad makes a query.</p>
+
+    <table>
+        <tr><th>Metric</th><th>Dryad (Annual)</th><th>Equivalent To</th></tr>
+        <tr><td><strong>Energy</strong></td><td>10.8-18 kWh</td><td>About 9-15 hours of household electricity</td></tr>
+        <tr><td><strong>Carbon (US grid)</strong></td><td>4.2-6.9 kg CO2</td><td>Driving 11-19 miles</td></tr>
+        <tr><td><strong>Carbon (renewable DC)</strong></td><td>0.5-0.9 kg CO2</td><td>Driving 1.4-2.5 miles</td></tr>
+        <tr><td><strong>Water</strong></td><td>40-150 liters</td><td>One small bathtub per year</td></tr>
+    </table>
+
+    <p>For context: Dryad's entire annual carbon footprint equals about <strong>10-17 minutes of highway driving</strong>. It's roughly 1/50th to 1/150th of a single domestic round-trip flight, depending on distance.</p>
+
+    <p class="source-link">Sources: arXiv - Jegham et al. 2025, TokenPowerBench; EIA grid emissions factor 2024; EPA vehicle/equipment emissions data</p>
+</div>
+</section>
+
+<!-- ═══════════════ PART 3: COMPARISON ═══════════════ -->
+<section id="comparison">
+<div class="content">
+    <h2>Part 3: How Does This Compare to Traditional Land Management?</h2>
+    <p>To be clear: there's nothing wrong with humans managing land. People have been doing conservation work for centuries, and community-driven stewardship is at the heart of this project regardless of whether AI is involved. Dryad is an experiment - we're testing whether an AI agent can handle the coordination and monitoring overhead so that the humans involved can focus on the hands-on work that matters.</p>
+    <p>Dryad doesn't fully replace human involvement - people still visit the lots, plant native species, and submit observations through <a href="https://www.inaturalist.org/" target="_blank">iNaturalist</a>. The AI handles coordination, monitoring analysis, and decision-making, which reduces but doesn't eliminate the need for travel and human labor.</p>
+    <p>The point isn't that AI is superior to human land management. It's that the AI component of this project adds negligible environmental cost while potentially making the overall effort more efficient and scalable.</p>
+</div>
+</section>
+
+<!-- ═══════════════ PART 4: BENEFITS ═══════════════ -->
+<section id="benefits">
+<div class="content">
+    <h2>Part 4: The Environmental Benefits Dwarf the Cost</h2>
+    <p>Here's what 0.57 acres of native pollinator habitat actually produces:</p>
+
+    <table>
+        <tr><th>Benefit</th><th>Annual Impact</th><th>Source</th></tr>
+        <tr><td><strong>Carbon sequestration</strong></td><td>0.57-0.97 metric tons CO2/year</td><td><a href="https://www.nature.com/articles/s41467-019-08636-w" target="_blank">Nature Communications 2019</a>; <a href="https://www.nature.com/articles/s41598-024-57789-2" target="_blank">Scientific Reports 2024</a></td></tr>
+        <tr><td><strong>Stormwater absorbed</strong></td><td>13,000-25,000 gallons/year</td><td><a href="https://www.fs.usda.gov/ecosystemservices/" target="_blank">USDA Forest Service 2022</a></td></tr>
+        <tr><td><strong>Temperature reduction</strong></td><td>2-3°C local microclimate cooling</td><td>ScienceDirect 2021</td></tr>
+        <tr><td><strong>Pollinator species supported</strong></td><td>30-80 species</td><td><a href="https://xerces.org/pollinator-conservation" target="_blank">Xerces Society</a>; PMC 2021</td></tr>
+        <tr><td><strong>Biodiversity increase</strong></td><td>10-20x species diversity vs. abandoned lot</td><td>NOAA; Detroit Audubon</td></tr>
+        <tr><td><strong>PM2.5 air pollution removed</strong></td><td>15-50 lbs/year</td><td><a href="https://research.fs.usda.gov/treesearch/43676" target="_blank">USDA Forest Service 2022</a></td></tr>
+    </table>
+
+    <div class="callout">
+        <p style="max-width:100%;margin-bottom:0"><strong style="color:var(--accent)">The net carbon math:</strong> Dryad sequesters <strong style="color:var(--accent-amber)">64-240x</strong> more carbon than it produces, and that ratio improves every year as the habitat matures.</p>
+    </div>
+</div>
+</section>
+
+<!-- ═══════════════ PART 5: SCALE ═══════════════ -->
+<section id="scale">
+<div class="content">
+    <h2>Part 5: At Scale, This Becomes Transformative</h2>
+    <p><a href="https://detroitfuturecity.com/" target="_blank">Detroit has 100,000+ vacant lots</a>. If this model were applied to just 1% (1,000 lots, ~63 acres):</p>
+
+    <div class="grid-2" style="margin-top:24px">
+        <div class="card" style="text-align:center">
+            <div class="stat-big">90-153</div>
+            <div class="stat-label">metric tons CO2/year sequestered</div>
+        </div>
+        <div class="card" style="text-align:center">
+            <div class="stat-big">23-44M</div>
+            <div class="stat-label">gallons stormwater managed/year</div>
+        </div>
+    </div>
+
+    <p style="margin-top:24px">The AI agent managing this at scale would consume roughly the energy of a few households. The environmental return is measured in tens to hundreds of tons of carbon and tens of millions of gallons of stormwater.</p>
+
+    <p class="source-link">Sources: <a href="https://detroitfuturecity.com/" target="_blank">Detroit Future City 2026</a>; FEMA Ecosystem Service Values 2022; UPenn/Wharton 2023</p>
+</div>
+</section>
+
+<!-- ═══════════════ PART 6: ACKNOWLEDGEMENTS ═══════════════ -->
+<section id="acknowledge">
+<div class="content">
+    <h2>Part 6: What We Acknowledge</h2>
+    <p>We're not claiming AI is carbon-neutral. We're not claiming data centers don't have real environmental costs. They do. Here's what we think is true:</p>
+
+    <div class="numbered-item">
+        <p style="max-width:100%"><strong style="color:var(--text-main)">1. The industry-wide AI energy problem is real</strong> and needs systemic solutions - <a href="https://www.there100.org/" target="_blank">renewable energy mandates</a>, <a href="https://www.microsoft.com/en-us/microsoft-cloud/blog/2024/12/09/sustainable-by-design-next-generation-datacenters-consume-zero-water-for-cooling/" target="_blank">water-free cooling</a>, <a href="https://www.opencompute.org/" target="_blank">efficiency improvements</a>, and <a href="https://sciencebasedtargets.org/" target="_blank">honest accounting by tech companies</a>.</p>
+    </div>
+
+    <div class="numbered-item">
+        <p style="max-width:100%"><strong style="color:var(--text-main)">2. The "AI uses water" critique applies to data center operators, not individual applications.</strong> Criticizing Dryad for data center water usage is like criticizing an electric car owner for coal power plants. The problem is real, but the lever for change is at the infrastructure level, not the application level.</p>
+    </div>
+
+    <div class="numbered-item">
+        <p style="max-width:100%"><strong style="color:var(--text-main)">3. Not all AI use is equal.</strong> Training a frontier model to generate memes has a different moral calculus than running inference to manage habitat restoration. The question isn't "does AI use energy?" - it's "does this particular use of AI create enough value to justify its cost?"</p>
+    </div>
+
+    <div class="numbered-item">
+        <p style="max-width:100%"><strong style="color:var(--text-main)">4. AI-assisted management likely has a smaller carbon footprint than purely traditional approaches.</strong> This is an experiment, not a verdict. But the early numbers suggest that offloading coordination and monitoring to an AI agent - while keeping humans central to the hands-on work - adds negligible environmental overhead. If it also makes the project more scalable, that's worth exploring.</p>
+    </div>
+
+    <div class="numbered-item">
+        <p style="max-width:100%"><strong style="color:var(--text-main)">5. Native habitat restoration alone can't offset the data center industry.</strong> A single large hyperscale data center (100 MW) emits roughly 386,000-463,000 metric tons of CO2 per year. At mature sequestration rates of 1.0-1.7 metric tons per acre, you'd need 227,000-463,000 acres of diverse native prairie to offset just one facility - roughly 2.5 to 5 times the entire area of Detroit.</p>
+        <p style="max-width:100%">That's the scale of the infrastructure problem. It has to be solved with renewable energy, efficiency improvements, and better cooling - not just trees and prairie grass. But it raises an interesting question: what if data center operators were required to fund habitat restoration proportional to their emissions? The model Dryad is testing - AI-coordinated, community-driven, autonomous once established - is exactly the kind of thing that could make restoration at that scale feasible.</p>
+        <p class="source-link">Source: <a href="https://arxiv.org/abs/2411.09786" target="_blank">arXiv - "Environmental Burden of United States Data Centers in the Artificial Intelligence Era," 2024</a></p>
+    </div>
+</div>
+</section>
+
+<!-- ═══════════════ BOTTOM LINE ═══════════════ -->
+<section id="bottom-line" style="border-bottom:none">
+<div class="content">
+    <div class="bottom-line">
+        <h2>The Bottom Line</h2>
+        <p>Each lot Dryad puts on the path to native habitat sequesters <strong style="color:var(--accent-amber)">64-240x more carbon</strong> than the AI uses - and that rate accelerates over time as biodiversity matures. Over 22 years, a single 0.57-acre site removes an estimated 11-13 metric tons of CO2, locked into soil for centuries to millennia. At Detroit scale, even 1% of vacant lots could sequester 90-153 metric tons of CO2 per year.</p>
+        <p><strong style="color:var(--text-main)">AI has real environmental costs. Dryad is an experiment in whether it can be part of the solution - and the carbon math says yes.</strong></p>
+    </div>
+</div>
+</section>
+
+<!-- ═══════════════ SOURCES ═══════════════ -->
+<section id="sources" style="padding-top:40px">
+<div class="content sources-section">
+    <h2 style="font-size:1.5rem;margin-bottom:24px">Sources</h2>
+
+    <h3>AI Environmental Footprint</h3>
+    <ul>
+        <li><a href="https://www.iea.org/reports/energy-and-ai" target="_blank">IEA, "Energy and AI" (2024)</a></li>
+        <li><a href="https://www.pewresearch.org/short-reads/2025/10/24/what-we-know-about-energy-use-at-us-data-centers-amid-the-ai-boom/" target="_blank">Pew Research, "US Data Centers" (2025)</a></li>
+        <li><a href="https://www.bloomberg.com/graphics/2025-ai-data-centers-electricity-prices/" target="_blank">Bloomberg, "AI Data Centers and Electricity Prices" (2025)</a></li>
+        <li><a href="https://www.cmu.edu/work-that-matters/energy-innovation/data-center-growth-could-increase-electricity-bills" target="_blank">Carnegie Mellon / NC State, Electricity Bill Impact Study (2025)</a></li>
+        <li><a href="https://www.brookings.edu/articles/the-future-of-data-centers/" target="_blank">Brookings, "The Future of Data Centers" (2025)</a></li>
+        <li><a href="https://news.ucr.edu/articles/2023/04/28/ai-programs-consume-large-volumes-scarce-water" target="_blank">UC Riverside, AI Water Usage Study (2023)</a></li>
+        <li><a href="https://sustainability.google/reports/google-2024-environmental-report/" target="_blank">Google 2024 Environmental Report</a></li>
+        <li><a href="https://globalenergymonitor.org/report/betting-big-on-data-centers-u-s-now-leads-world-for-new-gas-power-development/" target="_blank">Global Energy Monitor, Natural Gas for Data Centers (2026)</a></li>
+        <li>GPT-4 training energy estimates based on leaked data, analyzed by Towards Data Science (2023)</li>
+        <li><a href="https://arxiv.org/abs/2104.10350" target="_blank">Patterson et al., "Carbon Emissions and Large Neural Network Training" (GPT-3 era)</a></li>
+    </ul>
+
+    <h3>Dryad Footprint Calculations</h3>
+    <ul>
+        <li>Jegham et al., LLM Inference Energy (2025) - arXiv</li>
+        <li>EIA, US Grid Emissions Factor (2024)</li>
+        <li>EPA, Vehicle and Equipment Emissions Data</li>
+    </ul>
+
+    <h3>Conservation Benefits</h3>
+    <ul>
+        <li><a href="https://www.nature.com/articles/s41467-019-08636-w" target="_blank">Yang et al., "Soil carbon sequestration accelerated by restoration of grassland biodiversity," Nature Communications (2019)</a></li>
+        <li><a href="https://www.nature.com/articles/s41598-024-57789-2" target="_blank">Scientific Reports, "Urban Native Plant Habitat CO2 Sequestration" (2024)</a></li>
+        <li><a href="https://www.fs.usda.gov/nrs/pubs/jrnl/2022/nrs_2022_selbig_001.pdf" target="_blank">USDA Forest Service, Stormwater Quantification (2022)</a></li>
+        <li>FEMA, Ecosystem Service Value Updates (2022)</li>
+        <li><a href="https://xerces.org/pollinator-conservation/" target="_blank">Xerces Society, Pollinator Conservation</a></li>
+        <li><a href="https://research.fs.usda.gov/treesearch/43676" target="_blank">USDA Forest Service, PM2.5 Removal by Trees (2022)</a></li>
+        <li><a href="https://detroitfuturecity.com/" target="_blank">Detroit Future City, Land Conservancy Proposal (2026)</a></li>
+    </ul>
+
+    <h3>Organizations Working on Solutions</h3>
+    <ul>
+        <li><a href="https://www.there100.org/" target="_blank">RE100</a> - Global corporate initiative for 100% renewable electricity</li>
+        <li><a href="https://www.microsoft.com/en-us/microsoft-cloud/blog/2024/12/09/sustainable-by-design-next-generation-datacenters-consume-zero-water-for-cooling/" target="_blank">Microsoft Zero-Water Cooling</a> - Next-generation water-free datacenter cooling</li>
+        <li><a href="https://www.opencompute.org/" target="_blank">Open Compute Project</a> - Open-source data center efficiency designs</li>
+        <li><a href="https://sciencebasedtargets.org/" target="_blank">Science Based Targets initiative</a> - Corporate climate accountability standards</li>
+    </ul>
+</div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<div class="page-footer">
+<div class="content">
+    <div class="grid-2" style="gap:40px">
+        <div>
+            <p>Built by <strong>Nick George</strong></p>
+            <p><a href="https://www.canr.msu.edu/conservation_stewards/" target="_blank">Michigan Conservation Steward</a></p>
+            <p style="margin-top:8px"><a href="https://x.com/0xnock" target="_blank">@0xnock</a></p>
+        </div>
+        <div style="text-align:right">
+            <p><a href="https://github.com/vivicool12334/dryad" target="_blank">GitHub</a> &bull; <a href="mailto:dryad@agentmail.to">dryad@agentmail.to</a> &bull; <a href="https://x.com/DryadAgent" target="_blank">@DryadAgent</a></p>
+            <p><a href="http://5.75.225.23:3000/Dryad/dashboard" target="_blank">Dashboard</a> &bull; <a href="http://5.75.225.23:3000/Dryad/submit" target="_blank">Submit Portal</a></p>
+            <p><a href="https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22" target="_blank">BaseScan</a> &bull; dryadforest.eth</p>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>document.getElementById('heroNav').addEventListener('click',function(e){if(e.target.tagName==='A'){this.classList.remove('open');document.getElementById('menuToggle').textContent='☰';}});</script>
+</body></html>
