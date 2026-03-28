@@ -179,16 +179,19 @@ export class DecisionLoopService extends Service {
         steps,
       });
 
-      // Post loop summary to Twitter (@DryadAgent)
-      try {
-        const tweetText = formatLoopTweet({
-          season: season.season,
-          actionsTriggered,
-          spendingMode: lastSpendingMode || undefined,
-        });
-        await postTweet(tweetText);
-      } catch (tweetErr) {
-        logger.warn({ error: tweetErr }, '[Dryad] Twitter post failed (non-fatal)');
+      // Post loop summary to Twitter (@DryadAgent) — Mondays and Thursdays only (~$0.08/month)
+      const dayOfWeek = new Date().getDay(); // 0=Sun, 1=Mon, 4=Thu
+      if (dayOfWeek === 1 || dayOfWeek === 4) {
+        try {
+          const tweetText = formatLoopTweet({
+            season: season.season,
+            actionsTriggered,
+            spendingMode: lastSpendingMode || undefined,
+          });
+          await postTweet(tweetText);
+        } catch (tweetErr) {
+          logger.warn({ error: tweetErr }, '[Dryad] Twitter post failed (non-fatal)');
+        }
       }
 
     } catch (error) {
