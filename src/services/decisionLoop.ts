@@ -24,6 +24,7 @@ import { appendTreasurySnapshot } from './treasurySnapshots.ts';
 import { appendHealthSnapshot } from './healthSnapshots.ts';
 import { getTransactionHistory } from '../security/transactionGuard.ts';
 import { verifyWorkPhoto, verifyBeforeAfter } from './visionVerify.ts';
+import { postTweet, formatLoopTweet } from '../utils/twitter.ts';
 
 const CYCLE_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
@@ -177,6 +178,18 @@ export class DecisionLoopService extends Service {
         errorsEncountered,
         steps,
       });
+
+      // Post loop summary to Twitter (@DryadAgent)
+      try {
+        const tweetText = formatLoopTweet({
+          season: season.season,
+          actionsTriggered,
+          spendingMode: lastSpendingMode || undefined,
+        });
+        await postTweet(tweetText);
+      } catch (tweetErr) {
+        logger.warn({ error: tweetErr }, '[Dryad] Twitter post failed (non-fatal)');
+      }
 
     } catch (error) {
       const elapsed = Date.now() - cycleStart;
