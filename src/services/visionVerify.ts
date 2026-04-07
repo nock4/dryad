@@ -13,7 +13,20 @@ import * as fs from 'fs';
 import { logger } from '@elizaos/core';
 import { audit } from './auditLog.ts';
 import { DEMO_MODE, demoLog } from '../config/constants.ts';
-import { mockVision } from '../demo/mocks/mockVision.ts';
+
+// Lazy-load mock vision to avoid build-time resolution when demo/ doesn't exist
+let mockVision: any = null;
+function getMockVision() {
+  if (!mockVision) {
+    try {
+      const p = ['..', 'demo', 'mocks', 'mockVision.ts'].join('/');
+      mockVision = require(p);
+    } catch {
+      mockVision = { getNext: () => ({ score: 75, approved: true, notes: 'mock fallback' }) };
+    }
+  }
+  return mockVision;
+}
 
 // ---------------------------------------------------------------------------
 // Work-type visual checklists
@@ -379,7 +392,7 @@ export async function verifyWorkPhoto(opts: {
 
   // In demo mode, return mock vision results instead of calling a real vision model
   if (DEMO_MODE) {
-    const mock = mockVision.getNext();
+    const mock = getMockVision().getNext();
     demoLog(`Vision verify (DEMO) for ${workType} at ${parcelAddress}: score=${mock.score}, approved=${mock.approved}`);
     audit('VISION_VERIFY', `DEMO: ${parcelAddress} — score ${mock.score} ${mock.approved ? 'APPROVED' : 'REJECTED'}`, 'visionVerify', mock.approved ? 'info' : 'warn');
     return {
@@ -487,7 +500,7 @@ export async function verifyBeforeAfter(opts: {
 
   // Demo mode: use mock vision
   if (DEMO_MODE) {
-    const mock = mockVision.getNext();
+    const mock = getMockVision().getNext();
     demoLog(`Vision before/after (DEMO) for ${workType} at ${parcelAddress}: score=${mock.score}`);
     audit('VISION_VERIFY_COMPARE', `DEMO: ${parcelAddress} — score ${mock.score}`, 'visionVerify', mock.approved ? 'info' : 'warn');
     return {
