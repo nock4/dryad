@@ -1,0 +1,8 @@
+2026-04-07
+- Reworked `dryad media/sustainable-ai-guide.html` into a citizen-first one-pager for a general audience.
+- Simplified the top navigation to the primary reading path.
+- Rewrote the hero to make the promise plain, added clearer CTAs, and consolidated the opening statistics into one summary panel.
+- Reordered the page to: why it matters -> five public standards -> reader action -> lower-cloud/local AI -> Dryad -> deep-dive appendix.
+- Moved investor, advocacy, politics, and resources content into collapsible appendix panels.
+- Preserved the interactive local AI recommender and the full eight-point scorecard, while switching the scorecard to native checkbox inputs for accessibility.
+- Added repo notes: `DESIGN_SYSTEM.md` and `LESSONS.md`.

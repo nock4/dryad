@@ -9,6 +9,7 @@ import MilestonesPanel from './components/MilestonesPanel';
 import SubmissionsPanel from './components/SubmissionsPanel';
 import AuditPanel from './components/AuditPanel';
 import TransactionTable from './components/TransactionTable';
+import DefiAllocationsCard from './components/DefiAllocationsCard';
 import SeasonWidget from './components/SeasonWidget';
 
 // ── Shared card shell ─────────────────────────────────────────────────────────
@@ -253,6 +254,9 @@ export default function App() {
 
         {/* Treasury */}
         <TreasuryCard />
+
+        {/* DeFi Allocations */}
+        <DefiAllocationsCard />
 
         {/* Biodiversity */}
         <BiodiversityCard />

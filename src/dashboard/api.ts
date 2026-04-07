@@ -6,6 +6,7 @@ import type { FeatureCollection } from 'geojson';
 import type {
   LoopEntry, LoopLatest, TreasurySnapshot, HealthSnapshot,
   SeasonContext, AuditEntry, Transaction, Submission, Milestone, SummaryData,
+  DefiData,
 } from './types';
 
 const BASE = '/Dryad/api';
@@ -50,6 +51,8 @@ export const api = {
   milestones: () => get<{ milestones: Milestone[] }>('/milestones'),
 
   submissions: () => get<Submission[]>('/submissions'),
+
+  defi: (yieldDays = 7) => get<DefiData>(`/defi?yieldDays=${yieldDays}`),
 
   parcelsGeoJson: () => get<FeatureCollection>('/parcels/geojson'),
 

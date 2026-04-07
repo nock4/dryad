@@ -115,6 +115,70 @@ export interface Milestone {
   recorder: string;
 }
 
+// ── DeFi / Treasury allocation types ────────────────────────────────────────
+
+export interface DefiPosition {
+  protocolName: string;
+  depositedUsd: number;
+  depositTxHash?: string;
+  depositedAt: number;
+  currentApy: number;
+  contractAddress: string | null;
+}
+
+export interface DefiProtocolInfo {
+  name: string;
+  currentApy: number;
+  address: string;
+  minDeposit: number;
+  riskScore: number;
+}
+
+export interface RebalanceAction {
+  protocol: string;
+  action: 'deposit' | 'withdraw';
+  amountUsd: number;
+  txHash?: string;
+  success: boolean;
+}
+
+export interface RebalanceRecord {
+  timestamp: number;
+  actions: RebalanceAction[];
+  reasoning: string;
+  beforeAllocation: Record<string, number>;
+  afterAllocation: Record<string, number>;
+  estimatedApyBefore: number;
+  estimatedApyAfter: number;
+}
+
+export interface YieldSnapshotEntry {
+  timestamp: number;
+  protocols: Array<{ name: string; apy: number; riskAdjustedScore: number }>;
+  bestProtocol: string;
+  bestApy: number;
+}
+
+export interface DefiData {
+  positions: DefiPosition[];
+  protocols: DefiProtocolInfo[];
+  idleUsdc: number;
+  totalDeposited: number;
+  totalValue: number;
+  blendedApy: number;
+  annualYieldUsd: number;
+  dailyYieldUsd: number;
+  rebalancerStatus: {
+    lastRebalance: number;
+    daysSinceRebalance: number;
+    currentApy: number;
+    totalDeposited: number;
+    positionCount: number;
+  };
+  rebalanceHistory: RebalanceRecord[];
+  yieldHistory: YieldSnapshotEntry[];
+}
+
 export interface SummaryData {
   health: {
     score: number;

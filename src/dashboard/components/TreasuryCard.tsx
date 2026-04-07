@@ -6,17 +6,21 @@ import { Card, Stat, Badge, Loading, Err } from '../App';
 
 const ANNUAL_COST = 945;
 const NON_NEGOTIABLE = 383;
-const STETH_APR = 0.035;
-const SUSTAINABILITY_TARGET = ANNUAL_COST / STETH_APR; // ~$27,000
 
 function fmt(n: number, decimals = 0) {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
 export default function TreasuryCard() {
-  const { data: current, isLoading, error } = useQuery({
+  const { data: current, isLoading: loadingCurrent } = useQuery({
     queryKey: ['treasury-current'],
     queryFn: api.treasuryCurrent,
+    refetchInterval: 60_000,
+  });
+
+  const { data: defi, isLoading: loadingDefi } = useQuery({
+    queryKey: ['defi-treasury'],
+    queryFn: () => api.defi(7),
     refetchInterval: 60_000,
   });
 
@@ -26,53 +30,85 @@ export default function TreasuryCard() {
     refetchInterval: 5 * 60_000,
   });
 
-  // Compute live values from current endpoint (has live ETH price)
-  const ethNum = parseFloat(current?.ethBalance ?? '0');
-  const wstNum = parseFloat(current?.wstethBalance ?? '0');
-  const ethPrice = 2600; // fallback; actual price baked into daily yield
-  const annualYield = wstNum * ethPrice * STETH_APR;
-  const estimatedUsd = (ethNum + wstNum) * ethPrice;
-  const mode = annualYield >= ANNUAL_COST ? 'NORMAL' : annualYield >= NON_NEGOTIABLE ? 'CONSERVATION' : 'CRITICAL';
-  const progressPct = Math.min((estimatedUsd / SUSTAINABILITY_TARGET) * 100, 100);
+  const isLoading = loadingCurrent && loadingDefi;
 
-  // Build chart data from snapshots (oldest first for left-to-right)
+  // USDC-based values from DeFi endpoint
+  const totalUsdc = defi?.totalValue ?? 0;
+  const deployedUsdc = defi?.totalDeposited ?? 0;
+  const idleUsdc = defi?.idleUsdc ?? 0;
+  const blendedApy = defi?.blendedApy ?? 0;
+  const annualYield = defi?.annualYieldUsd ?? 0;
+  const dailyYield = defi?.dailyYieldUsd ?? 0;
+
+  // ETH balance (for gas)
+  const ethBal = parseFloat(current?.ethBalance ?? '0');
+
+  // Spending mode from yield
+  const mode = annualYield >= ANNUAL_COST ? 'NORMAL' : annualYield >= NON_NEGOTIABLE ? 'CONSERVATION' : 'CRITICAL';
+
+  // Sustainability: how much USDC deployed at current APY to cover $945/yr
+  const sustainabilityTarget = blendedApy > 0 ? ANNUAL_COST / blendedApy : 27000;
+  const progressPct = Math.min((deployedUsdc / sustainabilityTarget) * 100, 100);
+
+  // Build chart from snapshots
   const chartData = history
     ? [...history].reverse().map(s => ({
         date: new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         usd: s.estimatedUsd,
-        yield: s.annualYieldUsd,
       }))
     : [];
 
-  // Stress test values
-  const drop30Yield = wstNum * (ethPrice * 0.7) * STETH_APR;
-  const drop50Yield = wstNum * (ethPrice * 0.5) * STETH_APR;
-
   const modeColor = mode === 'NORMAL' ? 'green' : mode === 'CONSERVATION' ? 'amber' : 'red';
-  const modeBadge = <Badge label={mode} color={modeColor} />;
 
   return (
-    <Card title="Treasury" badge={modeBadge}>
+    <Card title="Treasury" badge={<Badge label={mode} color={modeColor} />}>
       {isLoading && <Loading />}
-      {error && (error as Error).message !== 'ROUTE_NOT_DEPLOYED' && <Err msg="Could not load treasury data" />}
 
-      {current && (
+      {(current || defi) && (
         <>
+          {/* Primary: USDC balances */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Stat value={parseFloat(current.wstethBalance).toFixed(4)} label="wstETH" />
-            <Stat value={parseFloat(current.ethBalance).toFixed(4)} label="ETH" />
-            <Stat value={`~$${fmt(estimatedUsd)}`} label="USD est." color={estimatedUsd >= SUSTAINABILITY_TARGET ? 'var(--green)' : 'var(--amber)'} />
+            <Stat value={`$${fmt(totalUsdc, 2)}`} label="Total USDC" />
+            <Stat
+              value={`$${fmt(deployedUsdc, 2)}`}
+              label="Earning yield"
+              color={deployedUsdc > 0 ? 'var(--green)' : 'var(--text-dim)'}
+            />
+            <Stat value={`$${fmt(idleUsdc, 2)}`} label="Idle (reserve)" />
           </div>
 
+          {/* Yield metrics */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Stat value={`$${fmt(annualYield, 0)}/yr`} label="Yield/yr (3.5% APR)" color={annualYield >= ANNUAL_COST ? 'var(--green)' : 'var(--red)'} />
-            <Stat value={current.dailyYieldUSD} label="Daily yield" />
+            <Stat
+              value={`${(blendedApy * 100).toFixed(2)}%`}
+              label="Blended APY"
+              color={blendedApy > 0.03 ? 'var(--green)' : 'var(--amber)'}
+            />
+            <Stat
+              value={`$${fmt(annualYield, 2)}/yr`}
+              label="Projected yield"
+              color={annualYield >= ANNUAL_COST ? 'var(--green)' : 'var(--red)'}
+            />
+            <Stat value={`$${dailyYield.toFixed(4)}/d`} label="Daily yield" />
           </div>
+
+          {/* Gas balance */}
+          {ethBal > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-dim)' }}>
+              <span>Gas (ETH on Base)</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{ethBal.toFixed(6)} ETH</span>
+            </div>
+          )}
 
           {/* Progress to sustainability */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-dim)', marginBottom: 4 }}>
-              <span>Progress to $27K sustainability target</span>
+              <span>
+                Progress to sustainability
+                <span style={{ fontSize: 10, marginLeft: 4 }}>
+                  (${fmt(sustainabilityTarget, 0)} USDC @ {(blendedApy * 100).toFixed(1)}% to cover ${fmt(ANNUAL_COST)}/yr)
+                </span>
+              </span>
               <span>{progressPct.toFixed(0)}%</span>
             </div>
             <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
@@ -107,43 +143,68 @@ export default function TreasuryCard() {
                 contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: 11 }}
                 formatter={(v: any) => [`$${fmt(v)}`, 'Value']}
               />
-              <ReferenceLine y={SUSTAINABILITY_TARGET} stroke="#4caf50" strokeDasharray="3 3" strokeOpacity={0.5} />
               <Area type="monotone" dataKey="usd" stroke="#66bb6a" fill="url(#tg)" strokeWidth={1.5} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      {/* Stress test */}
+      {/* Cost breakdown */}
       <details className="stress-test">
         <summary>
-          ▸ Stress test
+          ▸ Annual cost breakdown
         </summary>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginTop: 8 }}>
           <thead>
             <tr style={{ color: 'var(--text-dim)' }}>
-              <th style={{ textAlign: 'left', paddingBottom: 4 }}>Scenario</th>
-              <th style={{ textAlign: 'right' }}>Yield/yr</th>
-              <th style={{ textAlign: 'right' }}>vs $945</th>
+              <th style={{ textAlign: 'left', paddingBottom: 4 }}>Expense</th>
+              <th style={{ textAlign: 'right' }}>Cost/yr</th>
+              <th style={{ textAlign: 'right' }}>Status</th>
             </tr>
           </thead>
           <tbody>
             {[
-              { label: 'Current', yield: annualYield },
-              { label: 'ETH −30%', yield: drop30Yield },
-              { label: 'ETH −50%', yield: drop50Yield },
+              { label: 'Property taxes', cost: 134 },
+              { label: 'VPS hosting', cost: 65 },
+              { label: 'Gas fees', cost: 24 },
+              { label: 'LLC annual', cost: 25 },
+              { label: 'Domain + services', cost: 135 },
+              { label: 'Contractor payments', cost: 562 },
             ].map(row => (
               <tr key={row.label} style={{ borderTop: '1px solid var(--border)' }}>
                 <td style={{ padding: '5px 0' }}>{row.label}</td>
-                <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>${fmt(row.yield, 0)}</td>
-                <td style={{ textAlign: 'right', color: row.yield >= ANNUAL_COST ? 'var(--green)' : 'var(--red)' }}>
-                  {row.yield >= ANNUAL_COST ? '✓ covered' : `−$${fmt(ANNUAL_COST - row.yield, 0)}`}
+                <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                  ${fmt(row.cost)}
+                </td>
+                <td style={{ textAlign: 'right', color: annualYield >= row.cost ? 'var(--green)' : 'var(--red)', fontSize: 11 }}>
+                  {annualYield >= row.cost ? '✓' : '—'}
                 </td>
               </tr>
             ))}
+            <tr style={{ borderTop: '2px solid var(--border)' }}>
+              <td style={{ padding: '5px 0', fontWeight: 600 }}>Total</td>
+              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>$945</td>
+              <td style={{ textAlign: 'right', color: annualYield >= ANNUAL_COST ? 'var(--green)' : 'var(--red)' }}>
+                {annualYield >= ANNUAL_COST ? '✓ covered' : `−$${fmt(ANNUAL_COST - annualYield)}`}
+              </td>
+            </tr>
           </tbody>
         </table>
       </details>
+
+      {/* Wallet address */}
+      {current?.wallet && (
+        <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+          <a
+            href={`https://basescan.org/address/${current.wallet}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--text-dim)' }}
+          >
+            {current.wallet} ↗
+          </a>
+        </div>
+      )}
     </Card>
   );
 }

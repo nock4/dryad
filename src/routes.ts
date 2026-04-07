@@ -21,6 +21,9 @@ import { getCurrentSeason, getSeasonalBriefing } from './utils/seasonalAwareness
 import { extractGpsFromExif } from './utils/exifGps.ts';
 import { computeImageHash } from './utils/imageHash.ts';
 import { verifyWorkPhoto } from './services/visionVerify.ts';
+import { loadPositions, getYieldHistory, PROTOCOLS } from './services/yieldMonitor.ts';
+import { getRebalanceHistory, getRebalancerStatus } from './services/rebalancer.ts';
+import { getUsdcBalance } from './actions/defiYield.ts';
 
 // Built dashboard path (produced by `bun run build:dashboard`)
 const DASHBOARD_HTML_PATH = path.join(process.cwd(), 'dist', 'dashboard', 'index.html');
@@ -1154,6 +1157,77 @@ KEY URLS (use these exactly when relevant):
     handler: async (req: RouteRequest, res: RouteResponse) => {
       const days = parseIntParam((req.query as any)?.days, 30, 1, 365);
       res.json(getTreasuryHistory(days) as unknown);
+    },
+  },
+
+  // ─── Public API: DeFi positions, yields, and rebalance history ───────────
+  {
+    name: 'api-defi',
+    path: '/api/defi',
+    type: 'GET' as const,
+    handler: async (req: RouteRequest, res: RouteResponse) => {
+      corsHeaders(req, res);
+      try {
+        const positions = loadPositions();
+        const status = getRebalancerStatus();
+        const history = getRebalanceHistory();
+        const yieldDays = parseIntParam((req.query as any)?.yieldDays, 7, 1, 90);
+        const yieldHistory = getYieldHistory(yieldDays);
+
+        // Current protocol info with APYs
+        const protocols = PROTOCOLS.map(p => ({
+          name: p.name,
+          currentApy: p.currentApy,
+          address: p.address,
+          minDeposit: p.minDeposit,
+          riskScore: p.riskScore,
+        }));
+
+        // Get live USDC balance
+        let idleUsdc = 0;
+        try { idleUsdc = await getUsdcBalance(); } catch {}
+
+        const totalDeposited = positions.reduce((s, p) => s + p.depositedUsd, 0);
+        const totalValue = idleUsdc + totalDeposited;
+
+        // Blended APY across positions
+        let blendedApy = 0;
+        if (totalDeposited > 0) {
+          for (const pos of positions) {
+            const proto = PROTOCOLS.find(p => p.name === pos.protocolName);
+            if (proto) blendedApy += (pos.depositedUsd / totalDeposited) * proto.currentApy;
+          }
+        }
+
+        const annualYieldUsd = totalDeposited * blendedApy;
+        const dailyYieldUsd = annualYieldUsd / 365;
+
+        res.json({
+          positions: positions.map(p => {
+            const proto = PROTOCOLS.find(pr => pr.name === p.protocolName);
+            return {
+              protocolName: p.protocolName,
+              depositedUsd: p.depositedUsd,
+              depositTxHash: p.depositTxHash,
+              depositedAt: p.depositedAt,
+              currentApy: proto?.currentApy ?? 0,
+              contractAddress: proto?.address ?? null,
+            };
+          }),
+          protocols,
+          idleUsdc,
+          totalDeposited,
+          totalValue,
+          blendedApy,
+          annualYieldUsd,
+          dailyYieldUsd,
+          rebalancerStatus: status,
+          rebalanceHistory: history.slice(-20),  // Last 20 rebalances
+          yieldHistory: yieldHistory.slice(-100), // Last 100 yield snapshots
+        } as unknown);
+      } catch (err: any) {
+        res.status(500).json({ error: err?.message || 'Failed to fetch DeFi data' } as unknown);
+      }
     },
   },
 
