@@ -10,9 +10,14 @@ const initCharacter = ({ runtime }: { runtime: IAgentRuntime }) => {
   // Initialize demo mode if enabled
   if (DEMO_MODE) {
     logger.info('[Dryad] DEMO_MODE is active');
-    import('./demo/runner.ts').then(({ initDemo }) => initDemo()).catch(() => {
+    // Demo runner loaded via require to avoid build-time resolution
+    try {
+      const demoPath = ['demo', 'runner.ts'].join('/');
+      const { initDemo } = require('./' + demoPath);
+      initDemo();
+    } catch {
       logger.warn('[Dryad] Demo runner not available — skipping');
-    });
+    }
   }
 };
 
