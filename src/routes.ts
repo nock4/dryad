@@ -51,6 +51,13 @@ function corsHeaders(req: RouteRequest, res: RouteResponse): void {
   res.setHeader?.('Vary', 'Origin');
 }
 
+function securityHeaders(res: RouteResponse): void {
+  res.setHeader?.('X-Frame-Options', 'DENY');
+  res.setHeader?.('X-Content-Type-Options', 'nosniff');
+  res.setHeader?.('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader?.('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+}
+
 // Auth helper: checks Authorization: Bearer <secret> (constant-time to prevent timing attacks)
 function isAdmin(req: RouteRequest): boolean {
   const secret = process.env.ADMIN_SECRET;
@@ -579,6 +586,7 @@ export const dryadRoutes = [
     path: '/submit',
     type: 'GET' as const,
     handler: async (_req: RouteRequest, res: RouteResponse) => {
+      securityHeaders(res);
       res.setHeader?.('Content-Type', 'text/html');
       res.send(submitPageHTML());
     },
@@ -589,6 +597,7 @@ export const dryadRoutes = [
     type: 'GET' as const,
     handler: async (_req: RouteRequest, res: RouteResponse) => {
       // Legacy HTML dashboard — kept for fallback
+      securityHeaders(res);
       res.setHeader?.('Content-Type', 'text/html');
       res.send(dashboardHTML());
     },
@@ -979,8 +988,7 @@ export const dryadRoutes = [
     path: '/api/security',
     type: 'GET' as const,
     handler: async (req: RouteRequest, res: RouteResponse) => {
-      const adminSecret = process.env.ADMIN_SECRET;
-      if (!adminSecret || req.headers?.['x-admin-secret'] !== adminSecret) {
+      if (!isAdmin(req)) {
         res.status(403).json({ error: 'Unauthorized' } as unknown);
         return;
       }
@@ -1144,6 +1152,7 @@ KEY URLS (use these exactly when relevant):
     path: '/dashboard',
     type: 'GET' as const,
     handler: async (_req: RouteRequest, res: RouteResponse) => {
+      securityHeaders(res);
       try {
         const html = fs.readFileSync(DASHBOARD_HTML_PATH, 'utf-8');
         res.setHeader?.('Content-Type', 'text/html');
@@ -1161,6 +1170,7 @@ KEY URLS (use these exactly when relevant):
     type: 'GET' as const,
     handler: async (_req: RouteRequest, res: RouteResponse) => {
       // Legacy HTML dashboard — kept for fallback
+      securityHeaders(res);
       res.setHeader?.('Content-Type', 'text/html');
       res.send(dashboardHTML());
     },
@@ -1465,7 +1475,8 @@ KEY URLS (use these exactly when relevant):
         audit('ADMIN_ACTION', `Manual loop trigger: ${result.message}`, 'admin_api', 'info');
         res.json(result as unknown);
       } catch (err: any) {
-        res.status(500).json({ error: err?.message || 'Failed to trigger loop' } as unknown);
+        console.error('[Dryad] Trigger loop failed:', err);
+        res.status(500).json({ error: 'Failed to trigger decision loop' } as unknown);
       }
     },
   },
