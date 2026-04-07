@@ -31,6 +31,7 @@ const STEP_ICONS: Record<string, string> = {
   submissions: '📬',
   biodiversity: '🌿',
   treasury: '💰',
+  yield_rebalance: '📊',
   diem: '🔷',
   weekly_report: '📋',
 };

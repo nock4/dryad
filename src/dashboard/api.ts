@@ -41,7 +41,7 @@ export const api = {
   loopHistory: (limit = 30) => get<LoopEntry[]>(`/loop/history?limit=${limit}`),
 
   treasuryHistory: (days = 30) => get<TreasurySnapshot[]>(`/treasury/history?days=${days}`),
-  treasuryCurrent: () => get<{ wallet: string; ethBalance: string; wstethBalance: string; dailyYieldUSD: string; monthlyYieldUSD: string }>('/treasury'),
+  treasuryCurrent: () => get<{ wallet: string; ethBalance: string; wstethBalance: string; dailyYieldUSD: string; monthlyYieldUSD: string; usdcIdle?: number; usdcDeployed?: number; usdcTotal?: number; blendedApy?: number; usdcAnnualYield?: number; usdcDailyYield?: number }>('/treasury'),
 
   healthTrend: (days = 30) => get<{ latest: HealthSnapshot | null; history: HealthSnapshot[] }>(`/health/trend?days=${days}`),
   healthScore: () => get<{ healthScore: number; onParcelObservations: number; nativeSpeciesCount: number; invasiveCount: number }>('/health-score'),

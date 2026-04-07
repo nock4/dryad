@@ -389,7 +389,7 @@ code{word-break:break-all}
   <div class="card">
     <h2>Treasury Stress Test</h2>
     <div id="stressTest" class="loading">Loading...</div>
-    <p style="font-size:12px;color:#81c784;margin-top:8px">Target: 60% stETH / 40% USDC split. Sustainability: $27K in stETH at 3.5% APR to cover $945/yr (Yr 3+).</p>
+    <p style="font-size:12px;color:#81c784;margin-top:8px">USDC deployed into DeFi yield protocols (Aave V3, Compound V3) on Base L2.</p>
   </div>
 
   <!-- Milestones -->
@@ -463,38 +463,40 @@ document.head.appendChild(mapScript);
 
 // Load treasury data + stress test + spending mode
 fetch('/Dryad/api/treasury').then(r=>r.json()).then(data => {
-  const ethPrice = 2600;
-  const ethN = parseFloat(data.ethBalance || '0');
-  const wstN = parseFloat(data.wstethBalance || '0');
-  const totalUSD = ((ethN + wstN) * ethPrice).toFixed(0);
-  const annualYield = (wstN * ethPrice * 0.035).toFixed(2);
+  const usdcTotal = parseFloat(data.usdcTotal || '0');
+  const usdcDeployed = parseFloat(data.usdcDeployed || '0');
+  const usdcIdle = parseFloat(data.usdcIdle || '0');
+  const blendedApy = parseFloat(data.blendedApy || '0');
+  const annualYield = parseFloat(data.usdcAnnualYield || '0').toFixed(2);
+  const dailyYield = parseFloat(data.usdcDailyYield || '0').toFixed(4);
+  const ethBal = parseFloat(data.ethBalance || '0');
 
   document.getElementById('treasury').innerHTML = \`
     <div class="stat-row">
-      <div class="stat-item"><div class="stat">\${data.ethBalance || '0'}</div><div class="stat-label">ETH</div></div>
-      <div class="stat-item"><div class="stat">\${data.wstethBalance || '0'}</div><div class="stat-label">wstETH</div></div>
+      <div class="stat-item"><div class="stat">$\${usdcTotal.toFixed(2)}</div><div class="stat-label">Total USDC</div></div>
+      <div class="stat-item"><div class="stat">$\${usdcDeployed.toFixed(2)}</div><div class="stat-label">Earning yield</div></div>
     </div>
     <div class="stat-row">
-      <div class="stat-item"><div class="stat">~$\${totalUSD}</div><div class="stat-label">Total USD value</div></div>
-      <div class="stat-item"><div class="stat">\${data.dailyYieldUSD || '$0'}</div><div class="stat-label">Daily Yield</div></div>
+      <div class="stat-item"><div class="stat">\${(blendedApy * 100).toFixed(1)}%</div><div class="stat-label">Blended APY</div></div>
+      <div class="stat-item"><div class="stat">$\${dailyYield}</div><div class="stat-label">Daily Yield</div></div>
     </div>
-    <p style="font-size:12px;color:#81c784">Annual yield: ~$\${annualYield} | Target: 60% stETH / 40% USDC</p>
+    <p style="font-size:12px;color:#81c784">Annual yield: ~$\${annualYield} | Idle reserve: $\${usdcIdle.toFixed(2)} | Gas: \${ethBal.toFixed(6)} ETH</p>
     <p style="font-size:12px;color:#81c784">Wallet: <code>\${data.wallet || '—'}</code></p>
   \`;
   document.getElementById('walletAddr').textContent = data.wallet || '—';
 
-  // Stress test
-  const stethUSD = wstN * ethPrice;
-  const drop30 = stethUSD * 0.7 * 0.035;
-  const drop50 = stethUSD * 0.5 * 0.035;
+  // Stress test — USDC yield is stable (no ETH price risk), so show APY scenarios
+  const yieldCurrent = usdcDeployed * blendedApy;
+  const yieldLowApy = usdcDeployed * blendedApy * 0.5; // APY drops 50%
+  const yieldMinApy = usdcDeployed * 0.01; // worst case 1% APY
   document.getElementById('stressTest').innerHTML = \`
     <table>
       <tr><th>Scenario</th><th style="text-align:right">Annual Yield</th><th style="text-align:right">vs $945 cost</th></tr>
-      <tr><td>Current</td><td style="text-align:right">$\${annualYield}</td><td style="text-align:right;color:\${parseFloat(annualYield)>=945?'#4caf50':'#ef5350'}">\${parseFloat(annualYield)>=945?'✅ Covered':'⚠️ Shortfall $'+(945-parseFloat(annualYield)).toFixed(0)}</td></tr>
-      <tr><td>ETH -30%</td><td style="text-align:right">$\${drop30.toFixed(0)}</td><td style="text-align:right;color:\${drop30>=945?'#4caf50':'#ef5350'}">\${drop30>=945?'✅':'⚠️ -$'+(945-drop30).toFixed(0)}</td></tr>
-      <tr><td>ETH -50%</td><td style="text-align:right">$\${drop50.toFixed(0)}</td><td style="text-align:right;color:\${drop50>=945?'#4caf50':'#ef5350'}">\${drop50>=945?'✅':'⚠️ -$'+(945-drop50).toFixed(0)}</td></tr>
+      <tr><td>Current APY</td><td style="text-align:right">$\${yieldCurrent.toFixed(0)}</td><td style="text-align:right;color:\${yieldCurrent>=945?'#4caf50':'#ef5350'}">\${yieldCurrent>=945?'✅ Covered':'⚠️ Shortfall $'+(945-yieldCurrent).toFixed(0)}</td></tr>
+      <tr><td>APY halved</td><td style="text-align:right">$\${yieldLowApy.toFixed(0)}</td><td style="text-align:right;color:\${yieldLowApy>=945?'#4caf50':'#ef5350'}">\${yieldLowApy>=945?'✅':'⚠️ -$'+(945-yieldLowApy).toFixed(0)}</td></tr>
+      <tr><td>1% floor</td><td style="text-align:right">$\${yieldMinApy.toFixed(0)}</td><td style="text-align:right;color:\${yieldMinApy>=945?'#4caf50':'#ef5350'}">\${yieldMinApy>=945?'✅':'⚠️ -$'+(945-yieldMinApy).toFixed(0)}</td></tr>
     </table>
-    <p style="font-size:12px;color:#81c784;margin-top:8px">Need $27K in stETH (~10.4 ETH) for Year 3+ self-sustainability.</p>
+    <p style="font-size:12px;color:#81c784;margin-top:8px">Need ~$\${(945/blendedApy || 27000).toFixed(0)} USDC at current APY for full self-sustainability.</p>
   \`;
 
   // Spending mode
@@ -863,12 +865,16 @@ export const dryadRoutes = [
         const { createPublicClient, http, parseAbi, formatEther, formatUnits } = await import('viem');
         const { base } = await import('viem/chains');
         const { privateKeyToAccount } = await import('viem/accounts');
+        const { CHAIN } = await import('./config/constants.ts');
 
         const pk = process.env.EVM_PRIVATE_KEY;
         if (!pk) { res.json({ error: 'No wallet' }); return; }
 
         const account = privateKeyToAccount(pk as `0x${string}`);
-        const client = createPublicClient({ chain: base, transport: http() });
+        const client = createPublicClient({
+          chain: base,
+          transport: CHAIN.RPC_URL ? http(CHAIN.RPC_URL) : http()
+        });
 
         const ethBal = await client.getBalance({ address: account.address });
         const wstethAbi = parseAbi(['function balanceOf(address) view returns (uint256)']);
@@ -883,12 +889,44 @@ export const dryadRoutes = [
         try { const pr = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',{signal:AbortSignal.timeout(3000)}); if(pr.ok){const d=await pr.json() as any;ethPrice=d?.ethereum?.usd||2500;} } catch{}
         const dailyYield = (wstethNum * 0.035) / 365 * ethPrice;
 
+        // Get USDC DeFi data
+        let usdcIdle = 0;
+        let usdcDeployed = 0;
+        let blendedApy = 0;
+        let usdcAnnualYield = 0;
+        let usdcDailyYield = 0;
+
+        try {
+          usdcIdle = await getUsdcBalance();
+          const positions = loadPositions();
+          usdcDeployed = positions.reduce((s, p) => s + p.depositedUsd, 0);
+          // Calculate weighted blended APY
+          if (usdcDeployed > 0) {
+            for (const pos of positions) {
+              const proto = PROTOCOLS.find(p => p.name === pos.protocolName);
+              if (proto) blendedApy += (pos.depositedUsd / usdcDeployed) * proto.currentApy;
+            }
+          }
+          usdcAnnualYield = usdcDeployed * blendedApy;
+          usdcDailyYield = usdcAnnualYield / 365;
+        } catch (err) {
+          // Non-critical — continue with zero USDC data
+        }
+
+        const usdcTotal = usdcIdle + usdcDeployed;
+
         res.json({
           wallet: account.address,
           ethBalance: ethNum.toFixed(6),
           wstethBalance: wstethNum.toFixed(6),
-          dailyYieldUSD: `$${dailyYield.toFixed(2)}`,
-          monthlyYieldUSD: `$${(dailyYield * 30).toFixed(2)}`,
+          dailyYieldUSD: `$${(dailyYield + usdcDailyYield).toFixed(2)}`,
+          monthlyYieldUSD: `$${((dailyYield + usdcDailyYield) * 30).toFixed(2)}`,
+          usdcIdle,
+          usdcDeployed,
+          usdcTotal,
+          blendedApy,
+          usdcAnnualYield,
+          usdcDailyYield,
         });
       } catch {
         res.status(500).json({ error: 'Failed to fetch treasury data' });
@@ -907,7 +945,8 @@ export const dryadRoutes = [
         const contractAddr = process.env.MILESTONES_CONTRACT_ADDRESS as `0x${string}`;
         if (!contractAddr) { res.json({ milestones: [] }); return; }
 
-        const client = createPublicClient({ chain: base, transport: http() });
+        const { CHAIN: chainCfg } = await import('./config/constants.ts');
+        const client = createPublicClient({ chain: base, transport: chainCfg.RPC_URL ? http(chainCfg.RPC_URL) : http() });
         const abi = parseAbi([
           'function milestoneCount() view returns (uint256)',
           'function getMilestone(uint256) view returns (uint8,string,string,bytes32,uint256,address)',
@@ -1178,7 +1217,7 @@ KEY URLS (use these exactly when relevant):
         const protocols = PROTOCOLS.map(p => ({
           name: p.name,
           currentApy: p.currentApy,
-          address: p.address,
+          address: p.poolAddress,
           minDeposit: p.minDeposit,
           riskScore: p.riskScore,
         }));
@@ -1211,7 +1250,7 @@ KEY URLS (use these exactly when relevant):
               depositTxHash: p.depositTxHash,
               depositedAt: p.depositedAt,
               currentApy: proto?.currentApy ?? 0,
-              contractAddress: proto?.address ?? null,
+              contractAddress: proto?.poolAddress ?? null,
             };
           }),
           protocols,
@@ -1294,6 +1333,27 @@ KEY URLS (use these exactly when relevant):
       const season = getCurrentSeason();
       const auditSummary = getAuditSummary(24);
 
+      let usdcTotal = 0;
+      let usdcDeployed = 0;
+      let blendedApy = 0;
+      let usdcAnnualYield = 0;
+
+      try {
+        const usdcIdle = await getUsdcBalance();
+        const positions = loadPositions();
+        usdcDeployed = positions.reduce((s, p) => s + p.depositedUsd, 0);
+        if (usdcDeployed > 0) {
+          for (const pos of positions) {
+            const proto = PROTOCOLS.find(p => p.name === pos.protocolName);
+            if (proto) blendedApy += (pos.depositedUsd / usdcDeployed) * proto.currentApy;
+          }
+        }
+        usdcTotal = usdcIdle + usdcDeployed;
+        usdcAnnualYield = usdcDeployed * blendedApy;
+      } catch (err) {
+        console.warn('Failed to fetch USDC data for summary:', err);
+      }
+
       res.json({
         health: latestHealth ? {
           score: latestHealth.healthScore,
@@ -1311,6 +1371,10 @@ KEY URLS (use these exactly when relevant):
           annualYieldUsd: latestTreasury.annualYieldUsd,
           dailyYieldUsd: latestTreasury.dailyYieldUsd,
           spendingMode: latestTreasury.spendingMode,
+          usdcTotal: parseFloat(usdcTotal.toFixed(2)),
+          usdcDeployed: parseFloat(usdcDeployed.toFixed(2)),
+          blendedApy: parseFloat(blendedApy.toFixed(4)),
+          usdcAnnualYield: parseFloat(usdcAnnualYield.toFixed(2)),
           // Never expose wallet balances without auth — just mode and yield
         } : null,
         loop: {

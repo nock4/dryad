@@ -26,8 +26,10 @@ import { appendHealthSnapshot } from './healthSnapshots.ts';
 import { getTransactionHistory } from '../security/transactionGuard.ts';
 import { verifyWorkPhoto, verifyBeforeAfter } from './visionVerify.ts';
 import { postTweet, getNextQueuedTweet } from '../utils/twitter.ts';
-import { runRebalanceCheck } from './rebalancer.ts';
+import { runRebalanceCheck, getRebalancerStatus } from './rebalancer.ts';
 import { TIMING, FINANCIAL, DEMO_MODE, demoLog, demoSection, logConfig } from '../config/constants.ts';
+import { getUsdcBalance } from '../actions/defiYield.ts';
+import { loadPositions } from './yieldMonitor.ts';
 
 const CYCLE_INTERVAL_MS = TIMING.CYCLE_INTERVAL_MS;
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
@@ -169,7 +171,14 @@ export class DecisionLoopService extends Service {
         const result = await this.checkTreasuryHealth();
         if (result.modeChanged) actionsTriggered.push('treasuryAlert');
         if (result.snapshot) appendTreasurySnapshot(result.snapshot);
-        return `mode=${result.mode}, wstETH=${result.wstethNum.toFixed(4)}, yield=$${result.annualYield.toFixed(0)}/yr`;
+        const totalUsdc = result.deployedUsdc + result.idleUsdc;
+        const blendedApy = result.blendedApy * 100;
+        const usdcYield = result.usdcAnnualYield;
+        const parts = [`mode=${result.mode}`];
+        if (result.wstethNum > 0.0001) parts.push(`wstETH=${result.wstethNum.toFixed(4)}`);
+        parts.push(`USDC=$${totalUsdc.toFixed(2)} ($${result.deployedUsdc.toFixed(2)} earning ${blendedApy.toFixed(1)}%)`);
+        parts.push(`yield=$${result.annualYield.toFixed(2)}/yr`);
+        return parts.join(', ');
       });
 
       // 3b. Active yield rebalancing (runs after treasury health check)
@@ -480,8 +489,12 @@ Budget: Up to $50 per parcel per visit.`;
     annualYield: number;
     modeChanged: boolean;
     snapshot: import('./treasurySnapshots.ts').TreasurySnapshot | null;
+    deployedUsdc: number;
+    idleUsdc: number;
+    blendedApy: number;
+    usdcAnnualYield: number;
   }> {
-    const empty = { mode: 'UNKNOWN', wstethNum: 0, annualYield: 0, modeChanged: false, snapshot: null };
+    const empty = { mode: 'UNKNOWN', wstethNum: 0, annualYield: 0, modeChanged: false, snapshot: null, deployedUsdc: 0, idleUsdc: 0, blendedApy: 0, usdcAnnualYield: 0 };
 
     try {
       const { createPublicClient, http, parseAbi, formatEther, formatUnits } = await import('viem');
@@ -515,6 +528,21 @@ Budget: Up to $50 per parcel per visit.`;
       const ethNum = parseFloat(formatEther(ethBal));
       const wstethNum = parseFloat(formatEther(wstethBal));
 
+      // Fetch USDC DeFi data
+      let idleUsdc = 0;
+      let deployedUsdc = 0;
+      let blendedApy = 0;
+      let usdcAnnualYield = 0;
+      try {
+        idleUsdc = await getUsdcBalance();
+        const positions = loadPositions();
+        const rebalancerStatus = getRebalancerStatus();
+
+        deployedUsdc = rebalancerStatus.totalDeposited;
+        blendedApy = rebalancerStatus.currentApy;
+        usdcAnnualYield = deployedUsdc * blendedApy;
+      } catch { /* non-critical - continue with zero USDC data */ }
+
       // Live ETH price
       let ethPrice = 2600;
       try {
@@ -523,7 +551,8 @@ Budget: Up to $50 per parcel per visit.`;
       } catch { /* use fallback */ }
 
       const estimatedUsd = (ethNum + wstethNum) * ethPrice;
-      const annualYield = wstethNum * ethPrice * STETH_APR;
+      const wstethYield = wstethNum * ethPrice * STETH_APR;
+      const annualYield = wstethYield + usdcAnnualYield;
       const dailyYieldUsd = annualYield / 365;
 
       const isSustainable = annualYield >= ANNUAL_OPERATING_COST;
@@ -549,7 +578,7 @@ Budget: Up to $50 per parcel per visit.`;
         diemBalance: diemNum.toFixed(4),
       };
 
-      logger.info(`[Dryad] Treasury: ${ethNum.toFixed(4)} ETH + ${wstethNum.toFixed(4)} wstETH = ~$${estimatedUsd.toFixed(0)} | Yield: ~$${annualYield.toFixed(0)}/yr | Mode: ${mode}`);
+      logger.info(`[Dryad] Treasury: ${ethNum.toFixed(4)} ETH + ${wstethNum.toFixed(4)} wstETH + USDC=${(idleUsdc + deployedUsdc).toFixed(2)} (${deployedUsdc.toFixed(2)} deployed @ ${(blendedApy*100).toFixed(1)}%) = ~$${estimatedUsd.toFixed(0)} | Yield: ~$${annualYield.toFixed(0)}/yr | Mode: ${mode}`);
 
       const modeChanged = lastSpendingMode !== '' && lastSpendingMode !== mode;
       const yieldShift = lastYieldUSD > 0 && Math.abs(annualYield - lastYieldUSD) / lastYieldUSD > 0.1;
@@ -563,8 +592,8 @@ Budget: Up to $50 per parcel per visit.`;
 
 Spending Mode: ${mode}${modeChanged ? ` (was ${lastSpendingMode})` : ''}
 Total Value: ~$${estimatedUsd.toFixed(0)}
-ETH: ${ethNum.toFixed(4)} | wstETH: ${wstethNum.toFixed(4)}
-Annual Yield: ~$${annualYield.toFixed(0)}/yr (3.5% APR on wstETH)
+ETH: ${ethNum.toFixed(4)} | wstETH: ${wstethNum.toFixed(4)} | USDC: $${(idleUsdc + deployedUsdc).toFixed(2)} (${deployedUsdc.toFixed(2)} deployed @ ${(blendedApy*100).toFixed(1)}%)
+Annual Yield: ~$${annualYield.toFixed(0)}/yr (wstETH: $${wstethYield.toFixed(0)} @ 3.5% APR + USDC: $${usdcAnnualYield.toFixed(0)} @ ${(blendedApy*100).toFixed(1)}%)
 Required: $${ANNUAL_OPERATING_COST}/yr | Non-negotiable: $${NON_NEGOTIABLE_ANNUAL}/yr
 
 ${mode === 'NORMAL' ? 'All operations active.' : mode === 'CONSERVATION' ? 'Discretionary contractor jobs paused. Monitoring + taxes + VPS continue.' : 'CRITICAL: Yield insufficient for core costs. Steward intervention needed.'}`;
@@ -588,7 +617,7 @@ ${mode === 'NORMAL' ? 'All operations active.' : mode === 'CONSERVATION' ? 'Disc
         logger.error('[Dryad] CRITICAL — yield insufficient for non-negotiable costs. Steward intervention needed.');
       }
 
-      return { mode, wstethNum, annualYield, modeChanged, snapshot };
+      return { mode, wstethNum, annualYield, modeChanged, snapshot, deployedUsdc, idleUsdc, blendedApy, usdcAnnualYield };
     } catch (error) {
       logger.error({ error }, '[Dryad] Treasury check failed');
       return empty;

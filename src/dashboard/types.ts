@@ -43,6 +43,11 @@ export interface TreasurySnapshot {
   spendingMode: 'NORMAL' | 'CONSERVATION' | 'CRITICAL';
   dailySpendUsd: number;
   diemBalance: string;
+  usdcTotal?: number;
+  usdcDeployed?: number;
+  usdcIdle?: number;
+  blendedApy?: number;
+  usdcAnnualYield?: number;
 }
 
 export interface HealthSnapshot {
@@ -196,6 +201,10 @@ export interface SummaryData {
     annualYieldUsd: number;
     dailyYieldUsd: number;
     spendingMode: 'NORMAL' | 'CONSERVATION' | 'CRITICAL';
+    usdcTotal?: number;
+    usdcDeployed?: number;
+    blendedApy?: number;
+    usdcAnnualYield?: number;
   } | null;
   loop: {
     lastRunAt: number | null;
