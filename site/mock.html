@@ -468,13 +468,13 @@
 <section id="stats">
     <div class="content">
         <h2>Year 3 Status</h2>
-        <p>The system is self-sustaining. All costs covered by stETH yield.</p>
+        <p>The system is self-sustaining. All costs covered by USDC DeFi yield.</p>
 
         <div class="grid-3" style="margin-top: 32px; gap: 20px;">
             <div class="card card-health-high">
                 <div class="stat-label">Treasury Balance</div>
-                <div class="stat-big">$28,450</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">6.2 wstETH + 10,450 USDC + 1,880 DIEM</div>
+                <div class="stat-big">$24,210</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 12px;">22,330 USDC (Aave + Compound) + 1,880 DIEM</div>
                 <div style="font-size: 0.8rem; color: var(--accent); margin-top: 6px; font-weight: 600;">Yield-funded • Principal untouched</div>
             </div>
 
@@ -620,7 +620,7 @@
                 <span class="log-time">[2029-02-01 06:00]</span> <span class="log-action">MONITOR</span> — Winter dormancy scan: No action needed. Prairie dormant.
             </div>
             <div class="log-entry">
-                <span class="log-time">[2029-01-15 06:00]</span> <span class="log-action">TREASURY</span> — stETH yield harvest: $248.50 accrued this quarter
+                <span class="log-time">[2029-01-15 06:00]</span> <span class="log-action">TREASURY</span> — USDC yield harvest: $236.25 accrued this quarter (Aave V3 + Compound V3)
             </div>
             <div class="log-entry">
                 <span class="log-time">[2028-12-20 14:30]</span> <span class="log-action">MILESTONE</span> — Recorded onchain: Fall Monitoring Report — 78 species, health score 82 (tx: 0x2b7c...9f4a)
@@ -724,14 +724,19 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>wstETH (staked Ether)</td>
-                            <td>6.2</td>
-                            <td>$16,120</td>
+                            <td>USDC in Aave V3</td>
+                            <td>14,000</td>
+                            <td>$14,000</td>
                         </tr>
                         <tr>
-                            <td>USDC (stablecoin)</td>
-                            <td>10,450</td>
-                            <td>$10,450</td>
+                            <td>USDC in Compound V3</td>
+                            <td>7,000</td>
+                            <td>$7,000</td>
+                        </tr>
+                        <tr>
+                            <td>USDC (idle)</td>
+                            <td>1,330</td>
+                            <td>$1,330</td>
                         </tr>
                         <tr>
                             <td>DIEM (inference credits)</td>
@@ -741,7 +746,7 @@
                         <tr style="border-top: 2px solid var(--accent);">
                             <td style="font-weight: 700;">Total Treasury</td>
                             <td style="font-weight: 700;"></td>
-                            <td style="font-weight: 700; color: var(--accent-amber);">$28,450</td>
+                            <td style="font-weight: 700; color: var(--accent-amber);">$24,210</td>
                         </tr>
                     </tbody>
                 </table>
@@ -761,15 +766,15 @@
                     <tbody>
                         <tr>
                             <td><strong>Annual Yield Income</strong></td>
-                            <td style="color: var(--accent); font-weight: 600;">~$999/yr</td>
+                            <td style="color: var(--accent); font-weight: 600;">~$945/yr</td>
                         </tr>
                         <tr>
-                            <td style="padding-left: 28px; font-size: 0.85rem;">stETH APR (3.5%)</td>
-                            <td style="font-size: 0.85rem;">$564</td>
+                            <td style="padding-left: 28px; font-size: 0.85rem;">USDC in Aave V3 (4.5% APY)</td>
+                            <td style="font-size: 0.85rem;">$630</td>
                         </tr>
                         <tr>
-                            <td style="padding-left: 28px; font-size: 0.85rem;">USDC Aave (4.0%)</td>
-                            <td style="font-size: 0.85rem;">$418</td>
+                            <td style="padding-left: 28px; font-size: 0.85rem;">USDC in Compound V3 (4.5% APY)</td>
+                            <td style="font-size: 0.85rem;">$315</td>
                         </tr>
                         <tr style="border-top: 1px solid var(--card-border);">
                             <td><strong>Annual Costs</strong></td>
@@ -856,7 +861,7 @@
         </div>
 
         <div class="callout" style="margin-top: 28px;">
-            <strong>Design principle:</strong> The $27K stETH endowment was never touched. Yield covers operations. The forest can run in NORMAL mode for 50+ years, or enter CONSERVATION mode for 100+ years if needed.
+            <strong>Design principle:</strong> The $21K USDC treasury was never touched. Yield from Aave V3 and Compound V3 covers operations. No ETH price risk. The forest can run in NORMAL mode for 50+ years, or enter CONSERVATION mode for 100+ years if needed.
         </div>
     </div>
 </section>
