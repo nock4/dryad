@@ -24,6 +24,7 @@ export default function SubmissionsPanel() {
   const proofCount = all.filter(s => s.type === 'proof_of_work').length;
   const plantCount = all.filter(s => s.type === 'plant_id').length;
   const unprocessed = all.filter(s => !s.processed).length;
+  const attestedCount = all.filter(s => s.easAttestationUid).length;
 
   return (
     <Card title="Contractor & Community Submissions">
@@ -37,6 +38,7 @@ export default function SubmissionsPanel() {
         <span><strong style={{ color: 'var(--blue)' }}>{proofCount}</strong> <span style={{ color: 'var(--text-dim)' }}>proof-of-work</span></span>
         <span><strong style={{ color: 'var(--green-lit)' }}>{plantCount}</strong> <span style={{ color: 'var(--text-dim)' }}>plant IDs</span></span>
         {unprocessed > 0 && <span><strong style={{ color: 'var(--amber)' }}>{unprocessed}</strong> <span style={{ color: 'var(--text-dim)' }}>pending review</span></span>}
+        {attestedCount > 0 && <span><strong style={{ color: 'var(--blue)' }}>{attestedCount}</strong> <span style={{ color: 'var(--text-dim)' }}>onchain attested</span></span>}
       </div>
 
       {/* Filter tabs */}
@@ -92,6 +94,7 @@ export default function SubmissionsPanel() {
                 <span style={{ color: 'var(--text-muted)' }}>at {s.nearestParcel}</span>
                 <Badge label={s.type === 'proof_of_work' ? 'work' : 'plant'} color={s.type === 'proof_of_work' ? 'blue' : 'green'} />
                 {!s.processed && <Badge label="pending" color="amber" />}
+                {s.easAttestationUid && <Badge label="attested" color="blue" />}
               </div>
               {s.description && (
                 <div style={{ color: 'var(--text-dim)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -100,6 +103,11 @@ export default function SubmissionsPanel() {
               )}
               {s.contractorName && (
                 <div style={{ color: 'var(--text-dim)', fontSize: 11 }}>by {s.contractorName}</div>
+              )}
+              {s.easUrl && /^https:\/\/(base|base-sepolia)\.easscan\.org\//.test(s.easUrl) && (
+                <a href={s.easUrl} target="_blank" rel="noopener" style={{ color: 'var(--blue)', fontSize: 11, marginTop: 2, display: 'inline-block' }}>
+                  View onchain attestation ↗
+                </a>
               )}
               {!s.verified && s.verificationErrors.length > 0 && (
                 <div style={{ color: 'var(--red)', fontSize: 11, marginTop: 2 }}>

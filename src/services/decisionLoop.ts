@@ -11,6 +11,8 @@
  * 7. Post summary
  */
 import { Service, type IAgentRuntime, logger } from '@elizaos/core';
+import * as fs from 'fs';
+import * as path from 'path';
 import { getSubmissions, markProcessed, updateSubmissionVision, getSubmissionById, type PhotoSubmission } from '../submissions.ts';
 import { INVASIVE_SPECIES, INVASIVE_PRIORITY_1, INVASIVE_PRIORITY_2, INVASIVE_PRIORITY_3 } from '../actions/checkBiodiversity.ts';
 import { sendDryadEmail } from '../actions/agentMail.ts';
@@ -30,6 +32,9 @@ import { runRebalanceCheck, getRebalancerStatus } from './rebalancer.ts';
 import { TIMING, FINANCIAL, DEMO_MODE, demoLog, demoSection, logConfig } from '../config/constants.ts';
 import { getUsdcBalance } from '../actions/defiYield.ts';
 import { loadPositions } from './yieldMonitor.ts';
+import { getPendingApplications, approveContractor, type Contractor } from '../contractors.ts';
+import { attestWorkSubmission, getOrRegisterSchema, getAttestationUrl, attestObservation, getOrRegisterObservationSchema } from './easAttestation.ts';
+import { updateSubmissionAttestation } from '../submissions.ts';
 
 const CYCLE_INTERVAL_MS = TIMING.CYCLE_INTERVAL_MS;
 const CONTRACTOR_EMAIL = process.env.CONTRACTOR_EMAIL || 'powahgen@gmail.com';
@@ -57,6 +62,19 @@ const NATIVE_INDICATORS = [
   'Quercus', 'Carya',
   'Solidago', 'Aster', 'Symphyotrichum',
 ];
+
+// Track already-attested iNaturalist observation IDs (persists to disk)
+const ATTESTED_OBS_FILE = path.join(process.cwd(), 'data', 'attestedObservationIds.json');
+const attestedObservationIds = new Set<number>((() => {
+  try { return JSON.parse(fs.readFileSync(ATTESTED_OBS_FILE, 'utf-8')); } catch { return []; }
+})());
+function persistAttestedIds() {
+  try {
+    const dir = path.dirname(ATTESTED_OBS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(ATTESTED_OBS_FILE, JSON.stringify([...attestedObservationIds]));
+  } catch (err: any) { logger.warn(`[EAS] Failed to persist attested IDs: ${err?.message}`); }
+}
 
 // Singleton reference for admin trigger endpoint
 let activeInstance: DecisionLoopService | null = null;
@@ -143,6 +161,13 @@ export class DecisionLoopService extends Service {
         const result = await this.processSubmissions(weather.contractorWorkSafe, season);
         if (result.emailsSent > 0) actionsTriggered.push('sendEmail');
         return `${result.processed} processed, ${result.invasiveAlerts} invasive alerts, ${result.emailsSent} emails`;
+      });
+
+      // 1b. Review pending contractor applications
+      await runStep('contractor_review', async () => {
+        const result = await this.reviewContractorApplications();
+        if (result.approved > 0) actionsTriggered.push('contractorApproved');
+        return `${result.pending} pending, ${result.approved} approved, ${result.rejected} rejected`;
       });
 
       // 2. Check iNaturalist biodiversity
@@ -253,6 +278,74 @@ export class DecisionLoopService extends Service {
     } finally {
       this._running = false;
     }
+  }
+
+  /**
+   * Review pending contractor applications.
+   * Auto-approve if the application looks legitimate:
+   *  - Has a valid email
+   *  - Has a wallet address that looks like an Ethereum address
+   *  - Has some experience description (>10 chars)
+   *  - Selected at least one work type
+   * Send them their access code via email.
+   */
+  private async reviewContractorApplications(): Promise<{ pending: number; approved: number; rejected: number }> {
+    const pending = getPendingApplications();
+    if (pending.length === 0) return { pending: 0, approved: 0, rejected: 0 };
+
+    let approved = 0;
+    let rejected = 0;
+
+    for (const app of pending) {
+      // Basic legitimacy checks
+      const hasValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(app.email);
+      const hasWallet = /^0x[a-fA-F0-9]{40}$/.test(app.walletAddress);
+      const hasExperience = (app.experience || '').trim().length >= 10;
+      const hasWorkTypes = app.workTypes.length > 0;
+
+      if (hasValidEmail && hasWallet && hasExperience && hasWorkTypes) {
+        // Auto-approve
+        const updated = approveContractor(app.id);
+        if (updated && updated.accessCode) {
+          approved++;
+          logger.info(`[Dryad] Approved contractor: ${app.name} (${app.email}) → code ${updated.accessCode}`);
+          audit('CONTRACTOR_APPROVED', `${app.name} (${app.email}) → ${updated.accessCode}`, 'contractor_review', 'info');
+
+          // Send access code via email
+          try {
+            await sendDryadEmail(
+              app.email,
+              'Your Dryad Contractor Access Code',
+              `Hi ${app.name || 'there'},\n\n` +
+              `Welcome to the Dryad land stewardship program! Your application has been approved.\n\n` +
+              `Your access code: ${updated.accessCode}\n\n` +
+              `Use this code at https://dashboard.dryad.land/Dryad/submit to submit proof-of-work photos after completing jobs on the 25th Street parcels.\n\n` +
+              `Important:\n` +
+              `- Take photos using the in-app camera (minimum 2 per submission)\n` +
+              `- GPS is captured automatically — make sure location services are enabled\n` +
+              `- Photos must be taken on-site at the 25th Street parcels\n` +
+              `- Payment is up to $50/job in USDC on Base to your wallet: ${app.walletAddress}\n\n` +
+              `Questions? Reply to this email or chat with Dryad at https://dashboard.dryad.land/\n\n` +
+              `— Dryad 🌿`
+            );
+            logger.info(`[Dryad] Sent access code email to ${app.email}`);
+          } catch (err) {
+            logger.error(`[Dryad] Failed to send access code email to ${app.email}: ${err instanceof Error ? err.message : err}`);
+          }
+        }
+      } else {
+        // Log why it wasn't auto-approved — don't reject, leave as pending for manual review
+        const reasons = [];
+        if (!hasValidEmail) reasons.push('invalid email');
+        if (!hasWallet) reasons.push('invalid wallet address');
+        if (!hasExperience) reasons.push('experience too short');
+        if (!hasWorkTypes) reasons.push('no work types selected');
+        logger.info(`[Dryad] Contractor application needs manual review: ${app.name} (${app.email}) — ${reasons.join(', ')}`);
+        audit('CONTRACTOR_NEEDS_REVIEW', `${app.name} (${app.email}): ${reasons.join(', ')}`, 'contractor_review', 'info');
+      }
+    }
+
+    return { pending: pending.length, approved, rejected };
   }
 
   private async processSubmissions(contractorWorkSafe: boolean = true, season?: ReturnType<typeof getCurrentSeason>): Promise<{ processed: number; invasiveAlerts: number; emailsSent: number }> {
@@ -384,9 +477,63 @@ Budget: Up to $50 per parcel per visit.`;
       }
 
       logger.info(`[Dryad] ${proofOfWork.length} proof-of-work: ${visionApproved} approved, ${visionFlagged} flagged for review`);
+
+      // Mint EAS attestations for vision-approved submissions that don't have one yet
+      let attestationsCreated = 0;
+      for (const sub of proofOfWork) {
+        if (!sub.visionApproved || sub.easAttestationUid) continue;
+
+        try {
+          // Resolve contractor wallet address (fall back to zero address for non-contractor submissions)
+          let contractorWallet: `0x${string}` = '0x0000000000000000000000000000000000000000';
+          if (sub.contractorName) {
+            // Look up contractor wallet from the contractors registry
+            try {
+              const { validateAccessCode, getAllContractors } = await import('../contractors.ts');
+              const allContractors = getAllContractors();
+              const contractor = allContractors.find(c =>
+                c.name === sub.contractorName && c.status === 'approved' && c.walletAddress
+              );
+              if (contractor?.walletAddress?.startsWith('0x') && contractor.walletAddress.length === 42) {
+                contractorWallet = contractor.walletAddress as `0x${string}`;
+              }
+            } catch { /* non-critical */ }
+          }
+
+          const photoHash = (sub.imageHash && /^(0x)?[a-fA-F0-9]{64}$/.test(sub.imageHash)) ? sub.imageHash : '0x0000000000000000000000000000000000000000000000000000000000000000';
+          const visionScoreInt = Math.round((sub.visionScore || 0) * 100); // 0-100
+
+          const result = await attestWorkSubmission({
+            contractorAddress: contractorWallet,
+            workType: sub.workType || 'site_assessment',
+            parcelAddress: sub.nearestParcel || 'Unknown',
+            photoHash: photoHash.startsWith('0x') ? photoHash : `0x${photoHash}`,
+            visionScore: Math.min(visionScoreInt, 255),
+            timestamp: Math.floor(sub.submittedAt / 1000), // unix seconds
+            description: (sub.description || '').slice(0, 200),
+          });
+
+          updateSubmissionAttestation(sub.id, { uid: result.uid, txHash: result.txHash });
+          attestationsCreated++;
+          logger.info(`[EAS] ✅ Attested ${sub.id}: ${getAttestationUrl(result.uid)}`);
+        } catch (err: any) {
+          logger.error(`[EAS] Failed to attest ${sub.id}: ${err?.message}`);
+        }
+      }
+      if (attestationsCreated > 0) {
+        logger.info(`[EAS] ${attestationsCreated} new attestation(s) minted on Base`);
+      }
     }
 
-    markProcessed(unprocessed.map((s) => s.id));
+    // Only mark submissions processed if they were successfully handled
+    // (verified + attested, or non-proof-of-work that don't need attestation)
+    const successfulIds = unprocessed.filter((s) => {
+      if (s.type !== 'proof_of_work') return true; // non-work submissions are always processable
+      if (!s.visionApproved) return true; // flagged submissions are still "processed" (need manual review)
+      if (s.easAttestationUid) return true; // attestation succeeded
+      return false; // vision-approved but attestation didn't happen — retry next cycle
+    }).map((s) => s.id);
+    if (successfulIds.length > 0) markProcessed(successfulIds);
     return { processed: unprocessed.length, invasiveAlerts: invasiveReports.length, emailsSent };
   }
 
@@ -465,6 +612,57 @@ Budget: Up to $50 per parcel per visit.`;
 
       logger.info(`[Dryad] iNaturalist: ${observations.length} obs total, ${onParcelObs.length} on-parcel, health=${healthScore}/100, P1=${p1Count} P2=${p2Count} P3=${p3Count}`);
       recordApiCall('iNaturalist', true);
+
+      // ── Attest research-grade iNaturalist observations to EAS ──
+      // Only attest research-grade observations (community-verified species ID)
+      // Track attested observation IDs in memory to avoid duplicates across cycles
+      let obsAttested = 0;
+      const researchGrade = onParcelObs.filter((obs: any) => obs.quality_grade === 'research' && obs.id);
+      const newObservations = researchGrade.filter((obs: any) => !attestedObservationIds.has(obs.id));
+
+      if (newObservations.length > 0) {
+        // Cap at 5 per cycle to manage gas costs
+        const toAttest = newObservations.slice(0, 5);
+        if (newObservations.length > 5) {
+          logger.info(`[EAS] ${newObservations.length} new research-grade observations found, capping at 5 this cycle (${newObservations.length - 5} deferred)`);
+        }
+        for (const obs of toAttest) {
+          try {
+            const speciesName = (obs.taxon?.name || obs.species_guess || 'Unknown').slice(0, 200);
+            const commonName = (obs.taxon?.preferred_common_name || speciesName).slice(0, 200);
+            const observerName = (obs.user?.login || 'anonymous').slice(0, 100);
+            const [lat, lng] = (obs.location || '0,0').split(',').map(parseFloat);
+            const nearestParcel = findNearestParcel(lat, lng);
+            const isInvasive = invasiveCommonNames.length > 0 && (
+              Object.keys(INVASIVE_PRIORITY_1).some(g => speciesName.toLowerCase().includes(g.toLowerCase())) ||
+              Object.keys(INVASIVE_PRIORITY_2).some(g => speciesName.toLowerCase().includes(g.toLowerCase())) ||
+              Object.keys(INVASIVE_PRIORITY_3).some(g => speciesName.toLowerCase().includes(g.toLowerCase()))
+            );
+
+            const result = await attestObservation({
+              observerName,
+              speciesName,
+              commonName,
+              qualityGrade: obs.quality_grade,
+              observationId: obs.id,
+              parcelAddress: nearestParcel?.address || 'Unknown',
+              location: obs.location || '0,0',
+              observedAt: Math.floor(new Date(obs.observed_on || obs.created_at).getTime() / 1000),
+              isInvasive,
+            });
+
+            attestedObservationIds.add(obs.id);
+            persistAttestedIds();
+            obsAttested++;
+            logger.info(`[EAS] 🌿 Observation attested: ${commonName} by ${observerName} — ${getAttestationUrl(result.uid)}`);
+          } catch (err: any) {
+            logger.error(`[EAS] Failed to attest observation ${obs.id}: ${err?.message}`);
+          }
+        }
+        if (obsAttested > 0) {
+          logger.info(`[EAS] ${obsAttested} iNaturalist observation(s) attested on Base`);
+        }
+      }
 
       return {
         healthScore,
