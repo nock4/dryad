@@ -719,6 +719,7 @@
           <text x="440" y="545" text-anchor="middle" fill="#8DA667" font-family="Space Mono" font-size="11" opacity="0.8">→ Agent computes health score &amp; detects invasives</text>
           <text x="440" y="570" text-anchor="middle" fill="#8DA667" font-family="Space Mono" font-size="11" opacity="0.8">→ Email contractors with verified work orders</text>
           <text x="440" y="595" text-anchor="middle" fill="#8DA667" font-family="Space Mono" font-size="11" opacity="0.8">→ Record milestones &amp; pay in USDC on Base</text>
+          <text x="440" y="620" text-anchor="middle" fill="#8DA667" font-family="Space Mono" font-size="11" opacity="0.8">→ Mint EAS attestations for verified work</text>
         </svg>
     </div>
 </section>
@@ -754,16 +755,21 @@
     <div class="content">
         <h2>Prove It's Real</h2>
         <p style="margin-bottom: 28px;">Three external verifications you can check right now:</p>
-        <div class="grid-3">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
             <div class="card">
                 <h3>Live Dashboard</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 12px;">39/39 successful runs. Agent health, treasury status, DeFi positions — all live.</p>
+                <p style="font-size: 0.9rem; margin-bottom: 12px;">Agent health, treasury status, DeFi positions, contractor submissions — all live.</p>
                 <a href="https://dashboard.dryad.land/Dryad/dashboard" target="_blank" rel="noopener">View Dashboard →</a>
             </div>
             <div class="card">
                 <h3>On-Chain</h3>
                 <p style="font-size: 0.9rem; margin-bottom: 12px;">dryadforest.eth • ERC-8004 #35293 • Every transaction verifiable on BaseScan.</p>
                 <a href="https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880" target="_blank" rel="noopener">View BaseScan →</a>
+            </div>
+            <div class="card">
+                <h3>EAS Attestations</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 12px;">Every verified work submission mints an onchain attestation on Base via the Ethereum Attestation Service.</p>
+                <a href="https://base.easscan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880" target="_blank" rel="noopener">View Attestations →</a>
             </div>
             <div class="card">
                 <h3>Community Science</h3>
