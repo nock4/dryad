@@ -23,7 +23,7 @@ The target is 9 vacant lots on 25th Street in Detroit's Chadsey-Condon neighborh
 
 Dryad is an AI agent that runs a 24-hour autonomous loop: it checks the weather, monitors biodiversity through iNaturalist community science, coordinates contractors for invasive species removal, manages a self-sustaining treasury funded by DeFi staking yield, and records ecological milestones onchain so anyone can verify the impact. The target ecosystem is lakeplain oak openings and wet prairie, globally imperiled plant communities (less than 1% of historical range survives) that once covered this region.
 
-The financial model is designed to be permanently self-sustaining. At target treasury ($27,000 in staked ETH at ~3.5% annual yield), ongoing operations cost about $105/lot/year, less than the city's mowing cost, while delivering stormwater management, carbon sequestration, pollinator habitat, and urban heat reduction. After the initial establishment investment, it shouldn't need another grant.
+The financial model is designed to be permanently self-sustaining. At target treasury ($23,625 in USDC earning ~4% APY via cross-chain DeFi yield on Morpho and Aave V3), ongoing operations cost about $105/lot/year, less than the city's mowing cost, while delivering stormwater management, carbon sequestration, pollinator habitat, and urban heat reduction. After the initial establishment investment, it shouldn't need another grant.
 
 All code is open-source and designed to be replicated on any city's vacant land.
 
@@ -45,14 +45,14 @@ Chadsey-Condon has among the highest vacancy rates in Detroit. The Philadelphia 
 | Native seed mix (Michigan ecotype, 25+ species) | $3,000 |
 | 300 native saplings (bur oak, swamp white oak, pin oak, white oak, hickory, redbud, serviceberry, elderberry) | $3,500 |
 | Year 2 establishment maintenance (mowing, spot removal) | $2,500 |
-| Self-sustaining treasury endowment (stETH) | $27,000 |
+| Self-sustaining USDC treasury endowment (cross-chain DeFi yield) | $23,625 |
 | Infrastructure (VPS hosting, domain, LLC) | $1,500 |
 | Property taxes (Years 1-3) | $810 |
 | Documentation & community engagement | $2,000 |
 | Fiscal sponsor fee (~7%) | $3,940 |
 | **Total** | **$50,000** |
 
-The $27,000 treasury endowment is the key. Once funded, staking yield covers all ongoing costs permanently. The remaining $23,000 covers the 2-3 year establishment phase. After that, Dryad runs itself.
+The $23,625 USDC treasury endowment is the key. Once funded, cross-chain DeFi yield (~4% APY via Morpho and Aave V3 on Base and Arbitrum) covers all ongoing costs permanently. The remaining funds cover the 2-3 year establishment phase. After that, Dryad runs itself.
 
 ## Expected Outcomes
 

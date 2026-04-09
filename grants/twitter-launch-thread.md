@@ -37,7 +37,7 @@ Detroit's vacant lots sit on the ancient bed of glacial Lake Maumee. The right s
 
 ## 5/7
 
-The financial model: a one-time treasury of $27K in staked ETH generates ~$945/yr in yield.
+The financial model: a one-time treasury of $23.6K USDC earning ~4% APY cross-chain (Morpho + Aave on Base and Arbitrum) generates ~$945/yr in yield.
 
 Year 3+ operating costs: $945/yr. Per lot: ~$105/yr — less than the city pays to mow.
 
