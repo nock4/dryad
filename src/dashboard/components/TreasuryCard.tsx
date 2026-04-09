@@ -67,7 +67,7 @@ export default function TreasuryCard() {
       {(current || defi) && (
         <>
           {/* Primary: USDC balances */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <Stat value={`$${fmt(totalUsdc, 2)}`} label="Total USDC" />
             <Stat
               value={`$${fmt(deployedUsdc, 2)}`}
@@ -78,7 +78,7 @@ export default function TreasuryCard() {
           </div>
 
           {/* Yield metrics */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <Stat
               value={`${(blendedApy * 100).toFixed(2)}%`}
               label="Blended APY"

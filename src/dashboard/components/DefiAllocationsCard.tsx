@@ -94,14 +94,14 @@ function PositionsTable({ data }: { data: DefiData }) {
   }
 
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+    <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0', fontSize: 12 }}>
       <thead>
         <tr style={{ color: 'var(--text-dim)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           <th style={{ textAlign: 'left', paddingBottom: 6 }}>Protocol</th>
-          <th style={{ textAlign: 'right', paddingBottom: 6 }}>Deposited</th>
-          <th style={{ textAlign: 'right', paddingBottom: 6 }}>APY</th>
-          <th style={{ textAlign: 'right', paddingBottom: 6 }}>Yield/yr</th>
-          <th style={{ textAlign: 'right', paddingBottom: 6 }}>Tx</th>
+          <th style={{ textAlign: 'right', paddingBottom: 6, paddingLeft: 12 }}>Deposited</th>
+          <th style={{ textAlign: 'right', paddingBottom: 6, paddingLeft: 12 }}>APY</th>
+          <th style={{ textAlign: 'right', paddingBottom: 6, paddingLeft: 12 }}>Yield/yr</th>
+          <th style={{ textAlign: 'right', paddingBottom: 6, paddingLeft: 12 }}>Tx</th>
         </tr>
       </thead>
       <tbody>
@@ -117,16 +117,16 @@ function PositionsTable({ data }: { data: DefiData }) {
                 }} />
                 {pos.protocolName}
               </td>
-              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', paddingLeft: 12, whiteSpace: 'nowrap' }}>
                 ${fmt(pos.depositedUsd)}
               </td>
-              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--green)' }}>
+              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--green)', paddingLeft: 12, whiteSpace: 'nowrap' }}>
                 {(pos.currentApy * 100).toFixed(2)}%
               </td>
-              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+              <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', paddingLeft: 12, whiteSpace: 'nowrap' }}>
                 ${fmt(yearlyYield)}
               </td>
-              <td style={{ textAlign: 'right' }}>
+              <td style={{ textAlign: 'right', paddingLeft: 12, whiteSpace: 'nowrap' }}>
                 {pos.depositTxHash ? (
                   <a
                     href={`${BASESCAN}${pos.depositTxHash}`}
@@ -279,7 +279,7 @@ export default function DefiAllocationsCard() {
       {data && (
         <>
           {/* Top stats */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <Stat value={`$${fmt(data.totalValue)}`} label="Total USDC" />
             <Stat value={`$${fmt(data.totalDeposited)}`} label="Deployed" color={data.totalDeposited > 0 ? 'var(--green)' : 'var(--text-dim)'} />
             <Stat value={`${blendedApyPct}%`} label="Blended APY" color={apyColor} />

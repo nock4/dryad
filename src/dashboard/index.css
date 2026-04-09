@@ -10,7 +10,7 @@
   --border-lit: rgba(141, 166, 103, 0.4);
   --text:       #d2d6c1;
   --text-muted: rgba(210, 214, 193, 0.75);
-  --text-dim:   rgba(210, 214, 193, 0.4);
+  --text-dim:   rgba(210, 214, 193, 0.6);
   --green:      #8da667;
   --green-lit:  #a0bb78;
   --amber:      #e29e4b;
@@ -45,7 +45,34 @@ a:hover { color: var(--amber); text-decoration: none; }
   .header-nav { display: none !important; }
   .header-admin { display: none !important; }
   .header-mode { display: none !important; }
+  .mobile-nav { display: flex !important; }
 }
+@media (min-width: 701px) {
+  .mobile-nav { display: none !important; }
+}
+
+/* ── Screen-reader only (visually hidden but accessible) ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Mobile-friendly grid ── */
+@media (max-width: 480px) {
+  .dashboard-grid { grid-template-columns: 1fr !important; gap: 12px !important; padding: 12px !important; }
+}
+
+/* ── Scrollable table wrappers ── */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll::-webkit-scrollbar { height: 4px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border-lit); border-radius: 2px; }
 
 /* ── Stress test disclosure ── */
 details.stress-test summary {
