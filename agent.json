@@ -43,7 +43,7 @@
     "mechanism": "DIEM staking"
   },
   "treasury": {
-    "strategy": "60/40 stETH/USDC",
+    "strategy": "100% USDC cross-chain (Morpho + Aave on Base and Arbitrum)",
     "yield_only": true,
     "adaptive_spending": true,
     "modes": ["NORMAL", "CONSERVATION", "CRITICAL"]

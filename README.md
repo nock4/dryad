@@ -23,9 +23,10 @@ via iNaturalist app on the lots           and submit GPS-tagged proof photos
 │  1. Check iNaturalist for on-parcel observations       │
 │  2. Detect invasives → email contractor via AgentMail  │
 │  3. Review proof-of-work submissions                   │
-│  4. Check treasury health (stETH yield, DIEM stake)    │
-│  5. Record milestones onchain on Base L2               │
-│  6. Evaluate adaptive spending mode                    │
+│  4. Mint EAS attestations for verified work            │
+│  5. Check treasury health (USDC DeFi yield, DIEM stake)│
+│  6. Record milestones onchain on Base L2               │
+│  7. Evaluate adaptive spending mode                    │
 └─────────────────────────────────────────────────────────┘
          │                    │                    │
     Email via            USDC payment         Milestone
@@ -37,24 +38,26 @@ via iNaturalist app on the lots           and submit GPS-tagged proof photos
 | Contract | Address |
 |----------|---------|
 | DryadMilestones | [`0x7572dcac88720470d8cc827be5b02d474951bc22`](https://basescan.org/address/0x7572dcac88720470d8cc827be5b02d474951bc22) |
+| EAS (Attestations) | [`0x4200000000000000000000000000000000000021`](https://base.easscan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880) |
+| EAS Schema Registry | [`0x4200000000000000000000000000000000000020`](https://base.easscan.org) |
 | ERC-8004 Identity (#35293) | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432) |
 | Agent Wallet | [`dryadforest.eth`](https://app.ens.domains/dryadforest.eth) / [`0xf2f7527D86e2173c91fF1c10Ede03f6f84510880`](https://basescan.org/address/0xf2f7527D86e2173c91fF1c10Ede03f6f84510880) |
 | DIEM Token | [`0xf4d97f2da56e8c3098f3a8d538db630a2606a024`](https://basescan.org/address/0xf4d97f2da56e8c3098f3a8d538db630a2606a024) |
 
 ## Financial Model
 
-**Annual operating cost:** $645/yr (property taxes $270, VPS $58, DIEM $62, contractors $200, LLC $50, gas $5)
+**Annual operating cost (Year 3+):** $945/yr (property taxes $270, VPS $58, DIEM $62, contractors $500, LLC $50, gas $5)
 
-**Self-sustainability target:** $18,429 in stETH at 3.5% APR = $645/yr yield. That's ~7.1 ETH.
+**Self-sustainability target:** $23,625 in USDC at ~4% APY = $945/yr yield. Cross-chain DeFi yield via Morpho vaults and Aave V3 on Base and Arbitrum. No ETH price risk.
 
-**Treasury resilience:** 60% stETH / 40% USDC split. USDC on Aave/Morpho for stable yield. Survives a 50% ETH crash at 2x capitalization.
+**Treasury resilience:** 100% stablecoin (USDC). Deployed cross-chain wherever rates are highest. Morpho curators (Steakhouse, Gauntlet, RE7) regularly deliver 4-12% on USDC.
 
 **Adaptive spending modes:**
 - **NORMAL** — all operations active, yield covers costs
 - **CONSERVATION** — pause discretionary contractor jobs, maintain monitoring + taxes + VPS
 - **CRITICAL** — steward intervention needed
 
-**Total to bootstrap and sustain forever: ~$35K** ($17K setup + $18K treasury)
+**Total funding needed: ~$41K** ($13.5K setup + $2.9K years 1-2 + $23.6K treasury + $1K buffer)
 
 ## Agent Actions
 
@@ -66,6 +69,8 @@ via iNaturalist app on the lots           and submit GPS-tagged proof photos
 | `PAY_CONTRACTOR` | USDC payments on Base ($50/tx, $200/day limits) |
 | `RECORD_MILESTONE` | Record SiteAssessment, InvasiveRemoval, SoilPrep, NativePlanting, Monitoring onchain |
 | `VERIFY_ATTESTATION` | Verify GPS-tagged photo attestations against parcel boundaries |
+| `ATTEST_WORK` | Mint EAS attestation on Base for verified proof-of-work (contractor, work type, parcel, photo hash, vision score) |
+| `ATTEST_OBSERVATION` | Mint EAS attestation for research-grade iNaturalist observations (species, observer, GPS, quality grade) |
 | `SEND_EMAIL` / `CHECK_EMAIL` | AgentMail integration at dryad@agentmail.to |
 
 ## Web Pages
@@ -83,6 +88,7 @@ via iNaturalist app on the lots           and submit GPS-tagged proof photos
 - **[Lido](https://lido.fi)** — wstETH for yield-generating treasury
 - **[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004)** — Onchain agent identity standard
 - **[iNaturalist](https://inaturalist.org)** — Biodiversity data (community-sourced, research-grade)
+- **[EAS](https://attest.org)** — Ethereum Attestation Service for onchain work attestations on Base
 - **[AgentMail](https://agentmail.to)** — Agent email (dryad@agentmail.to)
 - **[Mapbox](https://mapbox.com)** — Satellite imagery on dashboard
 
@@ -133,8 +139,8 @@ elizaos start
 | Venice AI (~$5,750) | Venice inference + DIEM self-management |
 | Protocol Labs: Let the Agent Cook ($2,000) | Complete autonomous decision loop + ERC-8004 |
 | Protocol Labs: Agents With Receipts ($2,000) | Every action recorded onchain |
-| Lido: stETH Agent Treasury ($2,000) | Yield-only spending, split treasury |
-| Base: Agent Services ($1,667) | All activity on Base mainnet |
+| Lido: stETH Agent Treasury ($2,000) | Yield-only spending, cross-chain treasury |
+| Base: Agent Services ($1,667) | Attestations and milestones on Base mainnet |
 | Octant: Public Goods ($1,000) | Open-source urban ecology |
 
 ## License

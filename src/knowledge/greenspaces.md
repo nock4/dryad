@@ -62,7 +62,7 @@
 ## Why Dryad's Approach Works
 - Most urban greening programs fail when funding cycles end — lots revert within 2–3 years
 - Dryad's autonomous agent ensures permanent stewardship, not one-time greening
-- On-chain treasury (stETH yield) funds perpetual maintenance without annual budget dependence
+- On-chain treasury (cross-chain USDC DeFi yield) funds perpetual maintenance without annual budget dependence
 - iNaturalist integration provides continuous ecological monitoring — not just claiming impact, but measuring it
 - Community science volunteers serve as the sensor network; AI coordinates the response
 - Each of Dryad's 9 contiguous lots on 25th Street forms a connected green corridor, not isolated patches

@@ -3,19 +3,21 @@
 ## Decision Loop (every 24 hours)
 1. Check weather — don't schedule work if heavy rain in 48hrs
 2. Process new photo submissions from /Dryad/submit portal
-3. Query iNaturalist API for observations in parcel bounding box
-4. Compute ecosystem health score (0-100, weighted by MNFI priority tiers)
-5. Check treasury health (wstETH balance, yield, spending mode)
-6. Check DIEM stake (Venice inference credits)
-7. If P1 invasives detected → email contractor via AgentMail
-8. If milestone threshold crossed → record on DryadMilestones.sol
-9. Post summary to logs
+3. Vision-verify contractor photos → mint EAS attestation on Base for approved work
+4. Query iNaturalist API for observations in parcel bounding box
+5. Compute ecosystem health score (0-100, weighted by MNFI priority tiers)
+6. Mint EAS attestations for new research-grade iNaturalist observations (up to 5/cycle)
+7. Check treasury health (USDC balance, yield, spending mode)
+8. Check DIEM stake (Venice inference credits)
+9. If P1 invasives detected → email contractor via AgentMail
+10. If milestone threshold crossed → record on DryadMilestones.sol
+11. Post summary to logs
 
 ## Treasury Model
-- Principal target: $27,000 in wstETH on Base
-- APR: 3.5% (Lido staking yield)
+- Principal target: $23,625 in USDC deployed cross-chain (Base + Arbitrum)
+- APY: ~4% (Morpho vaults + Aave V3, cross-chain yield optimization)
 - Annual yield at target: ~$945
-- Split: 60% stETH / 40% USDC (on Aave/Morpho for 3-5% stable APR)
+- 100% stablecoin (USDC). No ETH price risk. Morpho curators (Steakhouse, Gauntlet, RE7) deliver 4-12%.
 - Annual costs: taxes $270, VPS $58, gas $5, LLC $50, contractors ~$500
 - Spending modes:
   - NORMAL: yield covers all costs
@@ -36,10 +38,32 @@
 - Each milestone: type, parcel address, description, data hash, timestamp, recorder
 - Viewable on BaseScan
 
+## EAS Attestations (Ethereum Attestation Service)
+Dryad mints two types of onchain attestations on Base via EAS (predeploy contracts):
+
+### Work Attestations
+- Triggered when the vision model approves contractor proof-of-work photos
+- Schema: contractor address, work type, parcel address, photo hash, vision score, timestamp, description
+- Each attestation creates a permanent, verifiable record of real-world ecological work
+- Viewable at base.easscan.org
+
+### Observation Attestations
+- Triggered for research-grade iNaturalist observations within parcel bounds
+- Schema: observer name, species name, common name, quality grade, observation ID, parcel address, GPS, observed date, invasive flag
+- Up to 5 new observations attested per decision loop cycle to manage gas costs
+- Creates a permanent onchain biodiversity record
+
+### Why EAS?
+- Composable: attestations can be bundled into Hypercerts for retroactive public goods funding
+- Portable: any project in the ReFi ecosystem can verify Dryad's ecological impact
+- Permanent: onchain records survive even if Dryad goes offline
+- EAS contract: 0x4200000000000000000000000000000000000021
+- Schema Registry: 0x4200000000000000000000000000000000000020
+
 ## Addresses
 - Agent wallet: 0xf2f7527D86e2173c91fF1c10Ede03f6f84510880 (dryadforest.eth)
 - USDC (Base): 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-- wstETH (Base): 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452
+- wstETH (Base, legacy): 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452
 - DIEM Token: 0xf4d97f2da56e8c3098f3a8d538db630a2606a024
 - Uniswap V3 Router: 0x2626664c2603336E57B271c5C0b26F421741e481
 - ERC-8004 Registry: 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432

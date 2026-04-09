@@ -26,10 +26,26 @@ Every iNaturalist observation feeds into Dryad's ecological health score. The ag
 - Monitor seasonal changes and phenology
 - Build a biodiversity baseline over time
 - Record ecological milestones on-chain
+- Mint onchain EAS attestations for research-grade observations (community-verified species ID)
 
-## Dashboard Submission Portal
+### Onchain Attestations
+Research-grade iNaturalist observations — where the community has confirmed the species ID — are automatically attested onchain via the Ethereum Attestation Service (EAS) on Base. Each attestation records the observer, species, GPS location, quality grade, and whether it's an invasive species. This creates a permanent, verifiable biodiversity record. View attestations at base.easscan.org.
 
-**URL:** Available at the Dryad dashboard under the submit section.
+## Contractor Proof-of-Work Portal
+
+**URL:** dashboard.dryad.land/Dryad/submit
+
+Approved contractors submit GPS-tagged before/after photos of their work. The flow:
+1. Contractor enters their access code (received via email after approval)
+2. Uses device camera to capture GPS-tagged photos (minimum 2, maximum 20)
+3. Selects work type and writes a description
+4. Submits — Dryad's vision model verifies the photos
+5. If approved, an onchain EAS attestation is minted on Base with: contractor address, work type, parcel, photo hash, and vision score
+6. Contractor is paid in USDC on Base ($50/tx limit, $200/day limit)
+
+Contractors can view their attestations on base.easscan.org — permanent proof of their ecological work.
+
+## Reporting Issues
 
 For reporting issues that don't fit iNaturalist:
 - Illegal dumping or debris on the lots

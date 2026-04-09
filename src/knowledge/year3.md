@@ -7,7 +7,7 @@ A mockup dashboard at dryad.vercel.app/mock.html shows what Dryad looks like in 
 - **Lots managed:** 9 (all acquired and restored)
 - **Ecosystem health score:** 72% and climbing
 - **Species documented:** 47 via iNaturalist (12 native targets established, 3 invasives under active management)
-- **Treasury:** Self-sustaining on stETH yield; operating cost ~$945/yr
+- **Treasury:** Self-sustaining on cross-chain USDC DeFi yield (~4% APY); operating cost ~$945/yr
 - **Contractors:** 3 verified, 28 total jobs completed
 - **On-chain milestones:** 12 recorded to DryadMilestones.sol
 

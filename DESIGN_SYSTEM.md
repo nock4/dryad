@@ -60,6 +60,11 @@ This file defines the visual and structural rules for Dryad's public-facing edit
   - Must state the page promise in plain language
   - Must include one clear primary CTA
   - Supporting stats should live in one summary panel, not scattered across the page
+- Editorial photos:
+  - Use documentary, landscape, infrastructure, or work-in-context photography; avoid generic corporate stock
+  - Limit photos to moments that clarify the story, not every section by default
+  - Every photo needs a substantive caption and a visible source / license line
+  - Prefer public-domain, CC0, or clearly attributed Commons imagery that can be archived locally with the page
 - Notes and callouts:
   - Use left-border callouts for framing, not as the dominant pattern
 - Standards/questions:
